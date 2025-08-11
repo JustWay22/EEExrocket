@@ -5163,13 +5163,13 @@ rocketStub.classList.remove('active');
 cssRocketScene.classList.remove('game-active', 'launching');
 }
 
-// Показать взрыв - ИСПОЛЬЗУЕМ ПРИКРЕПЛЕННЫЙ ГИФ
+// Показать взрыв - ОБНОВЛЕНО С НОВОЙ ГИФКОЙ
 function showExplosion() {
 hideExplosion();
 const rocketContainer = document.querySelector('.rocket-container');
 explosionElement = document.createElement('div');
 explosionElement.className = 'explosion';
-explosionElement.innerHTML = '<img src="/public/анимация.gif" alt="Explosion">';
+explosionElement.innerHTML = '<img src="https://i.postimg.cc/9f1zVsT4/1.gif" alt="Explosion">';
 rocketContainer.appendChild(explosionElement);
 document.getElementById('rocket-stub').style.display = 'none';
 cssRocketContainer.style.display = 'none';
@@ -5788,88 +5788,6 @@ setTimeout(() => {
 }, 2000);
 });
 </script>
-
-
-<!-- START: USER AUTH / BALANCE SYNC SCRIPT -->
-<script>
-/*
-  Simple login & balance sync.
-  - Prompts for username on login button click.
-  - Calls login.php (POST) to create or update user, receives balance and dates.
-  - refreshBalance(username) fetches current balance from get_balance.php.
-  Make sure your server serves the PHP files and the database credentials in db.php are set.
-*/
-
-function setTopUsername(name){
-  const el = document.querySelector(".top-username");
-  if(el) el.textContent = name;
-}
-// safe set balance (2 decimals)
-function setTopBalance(amount){
-  const el = document.querySelector(".top-balance-amount");
-  if(el) el.textContent = Number(amount).toFixed(2);
-}
-
-function loginUserPrompt(){
-  let username = prompt("Введите ваш ник:");
-  if(!username) return;
-  loginUser(username);
-}
-
-function loginUser(username){
-  fetch("login.php", {
-    method: "POST",
-    headers: { "Content-Type": "application/x-www-form-urlencoded" },
-    body: new URLSearchParams({ username: username })
-  })
-  .then(r => r.json())
-  .then(data => {
-    if(data.status === "success"){
-      setTopUsername(data.username);
-      setTopBalance(data.balance);
-      console.log("Регистрация:", data.reg_date, "Последний вход:", data.last_login);
-      // store current username in sessionStorage for future refreshes
-      sessionStorage.setItem("gs_username", data.username);
-    } else {
-      alert("Ошибка: " + (data.message || "Unknown"));
-    }
-  })
-  .catch(e => { console.error(e); alert("Ошибка сети"); });
-}
-
-function refreshBalanceStoredUser(){
-  const username = sessionStorage.getItem("gs_username");
-  if(!username) return;
-  fetch("get_balance.php?username=" + encodeURIComponent(username))
-    .then(r => r.json())
-    .then(data => {
-      if(data.status === "success"){
-        setTopBalance(data.balance);
-      } else {
-        console.warn("Balance refresh failed:", data.message);
-      }
-    })
-    .catch(e => console.error(e));
-}
-
-// Hook login button if exists
-document.addEventListener("DOMContentLoaded", function(){
-  // if there is a login button with class .top-login-btn -> override
-  const loginBtn = document.querySelector(".top-login-btn");
-  if(loginBtn){
-    loginBtn.addEventListener("click", function(e){
-      e.preventDefault();
-      loginUserPrompt();
-    });
-  }
-  // show stored username on load
-  const stored = sessionStorage.getItem("gs_username");
-  if(stored) setTopUsername(stored);
-  // initial balance refresh
-  setTimeout(refreshBalanceStoredUser, 500);
-});
-</script>
-<!-- END: USER AUTH / BALANCE SYNC SCRIPT -->
 
 </body>
 </html>
