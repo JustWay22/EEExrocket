@@ -1,0 +1,5875 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Игра - Краш</title>
+<script src="https://cdn.jsdelivr.net/npm/three@0.146.0/build/three.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/three@0.146.0/examples/js/loaders/GLTFLoader.js"></script>
+<style>
+/* Экран загрузки */
+.loading-screen {
+position: fixed;
+top: 0;
+left: 0;
+width: 100%;
+height: 100%;
+background: linear-gradient(45deg, #1a1a1a 0%, #2d1a00 25%, #1a1a1a 50%, #2d1a00 75%, #1a1a1a 100%);
+background-size: 400% 400%;
+animation: gradientShift 8s ease infinite;
+display: flex;
+flex-direction: column;
+align-items: center;
+justify-content: center;
+z-index: 10000;
+color: white;
+}
+
+.loading-logo {
+font-size: 4rem;
+font-weight: bold;
+margin-bottom: 2rem;
+text-shadow: 0 0 20px rgba(255, 215, 0, 0.5);
+}
+
+.loading-logo .logo-x {
+color: #ff8c00;
+}
+
+.loading-rocket {
+width: 80px;
+height: 80px;
+font-size: 60px;
+margin-bottom: 2rem;
+animation: rocketBounce 2s ease-in-out infinite;
+}
+
+@keyframes rocketBounce {
+0%, 100% { transform: translateY(0px) rotate(0deg); }
+50% { transform: translateY(-20px) rotate(5deg); }
+}
+
+.loading-progress {
+width: 300px;
+height: 8px;
+background: rgba(255, 255, 255, 0.2);
+border-radius: 4px;
+overflow: hidden;
+margin-bottom: 1rem;
+}
+
+.loading-progress-bar {
+height: 100%;
+background: linear-gradient(90deg, #ff8c00, #ffd700);
+border-radius: 4px;
+transition: width 0.3s ease;
+box-shadow: 0 0 10px rgba(255, 215, 0, 0.5);
+}
+
+.loading-text {
+font-size: 1.5rem;
+font-weight: bold;
+color: #ffd700;
+margin-bottom: 0.5rem;
+}
+
+.loading-subtext {
+font-size: 1rem;
+color: #aaa;
+text-align: center;
+}
+
+.loading-stars {
+position: absolute;
+top: 0;
+left: 0;
+width: 100%;
+height: 100%;
+pointer-events: none;
+}
+
+.loading-star {
+position: absolute;
+background: white;
+border-radius: 50%;
+animation: twinkle 3s infinite;
+}
+
+.loading-star.small { width: 2px; height: 2px; }
+.loading-star.medium { width: 3px; height: 3px; }
+.loading-star.large { width: 4px; height: 4px; }
+
+:root {
+--bg-primary: #1a1a1a;
+--bg-secondary: #2d1a00;
+--bg-panel: rgba(25, 25, 35, 0.9);
+--bg-card: rgba(40, 40, 50, 0.8);
+--border-color: rgba(255, 255, 255, 0.1);
+--text-primary: white;
+--text-secondary: #aaa;
+--accent-color: #ffd700;
+--accent-orange: #ff8c00;
+}
+
+[data-theme="red"] {
+--bg-primary: #2d1a1a;
+--bg-secondary: #3d1a1a;
+--bg-panel: rgba(45, 25, 25, 0.9);
+--bg-card: rgba(60, 30, 30, 0.8);
+--border-color: rgba(255, 100, 100, 0.2);
+--accent-color: #ff6b6b;
+--accent-orange: #ff4757;
+}
+
+[data-theme="white"] {
+--bg-primary: #f5f5f5;
+--bg-secondary: #e0e0e0;
+--bg-panel: rgba(255, 255, 255, 0.95);
+--bg-card: rgba(240, 240, 240, 0.9);
+--border-color: rgba(0, 0, 0, 0.1);
+--text-primary: #333;
+--text-secondary: #666;
+--accent-color: #2196f3;
+--accent-orange: #ff9800;
+}
+
+* {
+margin: 0;
+padding: 0;
+box-sizing: border-box;
+font-family: 'Arial', sans-serif;
+}
+
+body {
+background: rgb(30, 30, 30);
+perspective: 10rem;
+color: var(--text-primary);
+min-height: 100vh;
+display: flex;
+flex-direction: column;
+align-items: center;
+padding: 0;
+position: relative;
+overflow-x: hidden;
+}
+
+@keyframes gradientShift {
+0% { background-position: 0% 50%; }
+50% { background-position: 100% 50%; }
+100% { background-position: 0% 50%; }
+}
+
+@keyframes twinkle {
+0%, 100% { opacity: 0.3; }
+50% { opacity: 1; }
+}
+
+/* Космические объекты - последовательное появление */
+.space-object {
+position: absolute;
+opacity: 0;
+z-index: 2;
+transition: opacity 1s ease;
+}
+
+.space-object.visible {
+opacity: 0.8;
+}
+
+/* Луна для игрового поля - УВЕЛИЧЕНА В 3 РАЗА */
+.game-moon {
+top: 15%;
+left: 10%;
+width: 180px;
+height: 180px;
+background: radial-gradient(circle at 30% 30%, #fff, #ddd);
+border-radius: 50%;
+box-shadow: 0 0 15px rgba(255, 255, 255, 0.3);
+}
+
+/* Земля - НА ФОНЕ С ВРАЩЕНИЕМ */
+.game-earth {
+position: absolute;
+top: 0;
+left: 0;
+width: 180px;
+height: 180px;
+background-image: url('https://i.postimg.cc/T2WctdX7/2025-08-10-003354-no-bg-preview-carve-photos.png');
+background-size: cover;
+background-position: center;
+border-radius: 50%;
+animation: earthRotate 20s linear infinite;
+z-index: -1;
+opacity: 0.7;
+}
+
+@keyframes earthRotate {
+0% { transform: rotate(0deg); }
+100% { transform: rotate(360deg); }
+}
+
+/* Кометы вместо галактики */
+.comet {
+position: absolute;
+width: 60px;
+height: 60px;
+background-image: url('https://imgpng.ru/d/comet_PNG29.png');
+background-size: contain;
+background-repeat: no-repeat;
+background-position: center;
+z-index: 1;
+animation: cometFly 8s linear infinite;
+}
+
+@keyframes cometFly {
+0% {
+  transform: translateX(-100px) translateY(-100px) rotate(0deg);
+  opacity: 0;
+}
+10% {
+  opacity: 1;
+}
+90% {
+  opacity: 1;
+}
+100% {
+  transform: translateX(calc(100vw + 100px)) translateY(calc(100vh + 100px)) rotate(360deg);
+  opacity: 0;
+}
+}
+
+/* Солнце - появляется рядом с луной */
+.game-sun {
+top: 15%;
+left: 20%;
+width: 80px;
+height: 80px;
+background: radial-gradient(circle at 30% 30%, #ffeb3b, #ff9800);
+border-radius: 50%;
+box-shadow: 0 0 30px rgba(255, 193, 7, 0.6);
+filter: brightness(0.7);
+}
+
+.game-sun::before {
+content: '';
+position: absolute;
+top: -10px;
+left: -10px;
+width: 100px;
+height: 100px;
+background: transparent;
+border-radius: 50%;
+box-shadow: 
+  0 0 0 2px rgba(255, 193, 7, 0.3),
+  0 0 0 4px rgba(255, 193, 7, 0.2),
+  0 0 0 8px rgba(255, 193, 7, 0.1);
+animation: sunRays 4s ease-in-out infinite;
+}
+
+@keyframes sunRays {
+0%, 100% { transform: rotate(0deg) scale(1); }
+50% { transform: rotate(90deg) scale(1.1); }
+}
+
+/* Черная дыра */
+.game-blackhole {
+top: 20%;
+left: 25%;
+width: 100px;
+height: 100px;
+background: radial-gradient(circle, #000 30%, #1a1a1a 60%, #333 100%);
+border-radius: 50%;
+animation: blackholeDistort 3s ease-in-out infinite;
+box-shadow: 
+  inset 0 0 30px #000,
+  0 0 50px rgba(255, 255, 255, 0.1);
+}
+
+.game-blackhole::before {
+content: '';
+position: absolute;
+top: -20px;
+left: -20px;
+width: 140px;
+height: 140px;
+background: conic-gradient(from 0deg, transparent, #ff6b6b, transparent, #ffeb3b, transparent, #4caf50, transparent);
+border-radius: 50%;
+animation: blackholeRing 2s linear infinite;
+z-index: -1;
+}
+
+@keyframes blackholeDistort {
+0%, 100% { transform: scale(1); }
+50% { transform: scale(1.05); }
+}
+
+@keyframes blackholeRing {
+0% { transform: rotate(0deg); }
+100% { transform: rotate(360deg); }
+}
+
+/* Фон леса - ВЫХОДИТ ЗА РАМКИ */
+.game-forest-background {
+position: absolute;
+bottom: -100px;
+left: -50px;
+width: calc(100% + 100px);
+height: 250px;
+background: url('https://i.postimg.cc/RFNRtZ43/cvbgfg.png') repeat-x center bottom;
+background-size: auto 250px;
+opacity: 0;
+z-index: 0;
+transition: all 1s ease;
+transform: translateY(0px);
+pointer-events: none;
+}
+
+.game-forest-background.visible {
+opacity: 0.8;
+}
+
+.game-forest-background.moving {
+animation: forestMoveDown 2s ease-out forwards;
+}
+
+@keyframes forestMoveDown {
+0% { 
+  transform: translateY(0px); 
+  opacity: 0.8;
+}
+100% { 
+  transform: translateY(200px); 
+  opacity: 0;
+}
+}
+
+/* Левая боковая панель - улучшенная */
+.left-sidebar {
+position: fixed;
+left: 0;
+top: 0;
+bottom: 0;
+width: 280px;
+background: linear-gradient(180deg, #1a1a1a 0%, #2a2a2a 100%);
+border-right: 1px solid #333;
+display: flex;
+flex-direction: column;
+padding: 0;
+z-index: 999;
+box-shadow: 2px 0 15px rgba(0, 0, 0, 0.7);
+}
+
+/* Профиль пользователя в верхней части */
+.sidebar-user-profile {
+background: linear-gradient(135deg, #333 0%, #444 100%);
+padding: 20px;
+border-bottom: 1px solid #444;
+display: flex;
+align-items: center;
+gap: 15px;
+cursor: pointer;
+transition: background 0.3s ease;
+}
+
+.sidebar-user-profile:hover {
+background: linear-gradient(135deg, #444 0%, #555 100%);
+}
+
+.user-avatar {
+width: 45px;
+height: 45px;
+background: linear-gradient(135deg, #ff8c00, #ffd700);
+border-radius: 50%;
+display: flex;
+align-items: center;
+justify-content: center;
+font-size: 20px;
+font-weight: bold;
+color: #000;
+}
+
+.user-info {
+flex: 1;
+}
+
+.user-name {
+font-size: 14px;
+font-weight: bold;
+color: white;
+margin-bottom: 2px;
+}
+
+.user-id {
+font-size: 11px;
+color: #aaa;
+}
+
+.user-next-arrow {
+color: #666;
+font-size: 18px;
+}
+
+/* Секция бонусов с картинкой */
+.sidebar-bonus-section {
+background: linear-gradient(135deg, #0d4a2c 0%, #0f5a35 100%);
+margin: 15px;
+border-radius: 10px;
+padding: 15px;
+display: flex;
+align-items: center;
+gap: 12px;
+cursor: pointer;
+transition: all 0.3s ease;
+box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.sidebar-bonus-section:hover {
+background: linear-gradient(135deg, #0f5a35 0%, #11653f 100%);
+transform: translateY(-2px);
+box-shadow: 0 6px 20px rgba(0, 0, 0, 0.4);
+}
+
+.bonus-icon {
+width: 40px;
+height: 40px;
+background: white;
+border-radius: 8px;
+display: flex;
+align-items: center;
+justify-content: center;
+font-size: 20px;
+background-image: url('https://i.postimg.cc/0QZyvcVN/2025-08-09-195905-Photoroom.png');
+background-size: contain;
+background-repeat: no-repeat;
+background-position: center;
+}
+
+.bonus-text {
+color: white;
+font-size: 16px;
+font-weight: bold;
+}
+
+/* Игры секция */
+.sidebar-games-section {
+padding: 0 15px;
+}
+
+.games-section-header {
+display: flex;
+align-items: center;
+gap: 10px;
+padding: 15px 10px;
+color: #ccc;
+font-size: 14px;
+font-weight: bold;
+text-transform: uppercase;
+cursor: pointer;
+transition: color 0.3s ease;
+}
+
+.games-section-header:hover {
+color: white;
+}
+
+.games-icon {
+font-size: 16px;
+}
+
+.games-arrow {
+margin-left: auto;
+transition: transform 0.3s ease;
+}
+
+.games-section-header.expanded .games-arrow {
+transform: rotate(180deg);
+}
+
+.games-list {
+max-height: 0;
+overflow: hidden;
+transition: max-height 0.3s ease;
+}
+
+.games-list.expanded {
+max-height: 200px;
+}
+
+.game-item {
+display: flex;
+align-items: center;
+gap: 12px;
+padding: 12px 20px;
+color: #ccc;
+font-size: 13px;
+font-weight: 500;
+cursor: pointer;
+transition: all 0.3s ease;
+border-radius: 8px;
+margin: 2px 0;
+background: rgba(255, 255, 255, 0.05);
+border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.game-item:hover {
+background: rgba(255, 255, 255, 0.1);
+color: white;
+transform: translateX(5px);
+box-shadow: 0 2px 10px rgba(0, 0, 0, 0.3);
+}
+
+.game-item.active {
+background: linear-gradient(135deg, var(--accent-orange), var(--accent-color));
+color: #000;
+font-weight: bold;
+box-shadow: 0 4px 15px rgba(255, 140, 0, 0.4);
+}
+
+.game-item-icon {
+font-size: 16px;
+width: 20px;
+height: 20px;
+text-align: center;
+display: flex;
+align-items: center;
+justify-content: center;
+background-size: contain;
+background-repeat: no-repeat;
+background-position: center;
+}
+
+/* Специальные иконки для игр */
+.crash-icon {
+background-image: url('https://i.postimg.cc/bYTtYRZk/2025-08-09-195739-Photoroom.png');
+}
+
+.miner-icon {
+background-image: url('https://imgpng.ru/d/bomb_PNG35.png');
+}
+
+.bonuses-icon {
+background-image: url('https://i.postimg.cc/0QZyvcVN/2025-08-09-195905-Photoroom.png');
+}
+
+.game-item-arrow {
+margin-left: auto;
+font-size: 12px;
+opacity: 0.6;
+}
+
+/* Разделитель между секциями */
+.sidebar-divider {
+height: 1px;
+background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+margin: 15px 0;
+}
+
+/* Нижняя секция меню - улучшенная */
+.sidebar-bottom-section {
+margin-top: auto;
+padding: 15px;
+}
+
+.sidebar-menu-item {
+display: flex;
+align-items: center;
+gap: 12px;
+padding: 12px 15px;
+color: #ccc;
+font-size: 13px;
+font-weight: 500;
+cursor: pointer;
+transition: all 0.3s ease;
+border-radius: 8px;
+margin: 4px 0;
+position: relative;
+background: rgba(255, 255, 255, 0.05);
+border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.sidebar-menu-item:hover {
+background: rgba(255, 255, 255, 0.1);
+color: white;
+transform: translateX(5px);
+box-shadow: 0 2px 10px rgba(0, 0, 0, 0.3);
+}
+
+.sidebar-menu-item.bonuses {
+justify-content: space-between;
+}
+
+.menu-item-icon {
+font-size: 16px;
+width: 20px;
+height: 20px;
+text-align: center;
+display: flex;
+align-items: center;
+justify-content: center;
+background-size: contain;
+background-repeat: no-repeat;
+background-position: center;
+}
+
+/* Иконка бонусов */
+.bonuses-menu-icon {
+background-image: url('https://i.postimg.cc/0QZyvcVN/2025-08-09-195905-Photoroom.png');
+}
+
+.menu-item-badge {
+background: #ff1744;
+color: white;
+border-radius: 50%;
+width: 18px;
+height: 18px;
+display: flex;
+align-items: center;
+justify-content: center;
+font-size: 11px;
+font-weight: bold;
+}
+
+.menu-item-new-badge {
+background: #2196f3;
+color: white;
+border-radius: 12px;
+padding: 2px 8px;
+font-size: 10px;
+font-weight: bold;
+text-transform: uppercase;
+}
+
+/* Логотип XROCKET */
+.sidebar-logo {
+padding: 20px 15px;
+text-align: center;
+border-top: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.sidebar-logo-text {
+font-size: 24px;
+font-weight: bold;
+color: white;
+}
+
+.sidebar-logo-text .logo-x {
+color: var(--accent-orange);
+}
+
+/* Приложение для Windows */
+.windows-app-section {
+background: linear-gradient(135deg, #1e3a5f 0%, #2a4d73 100%);
+margin: 15px;
+border-radius: 10px;
+padding: 15px;
+cursor: pointer;
+transition: all 0.3s ease;
+box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.windows-app-section:hover {
+background: linear-gradient(135deg, #2a4d73 0%, #356687 100%);
+transform: translateY(-2px);
+box-shadow: 0 6px 20px rgba(0, 0, 0, 0.4);
+}
+
+.windows-app-header {
+display: flex;
+align-items: center;
+gap: 12px;
+margin-bottom: 8px;
+}
+
+.windows-app-icon {
+width: 30px;
+height: 30px;
+background: #2196f3;
+border-radius: 6px;
+display: flex;
+align-items: center;
+justify-content: center;
+color: white;
+font-size: 16px;
+}
+
+.windows-app-title {
+color: white;
+font-size: 13px;
+font-weight: bold;
+}
+
+.windows-app-arrow {
+margin-left: auto;
+color: #ccc;
+font-size: 16px;
+}
+
+.windows-app-subtitle {
+color: #aaa;
+font-size: 11px;
+line-height: 1.3;
+margin-left: 42px;
+}
+
+/* Социальные ссылки */
+.sidebar-social-section {
+padding: 15px;
+border-top: 1px solid #333;
+}
+
+.social-links {
+display: flex;
+justify-content: space-around;
+align-items: center;
+gap: 10px;
+}
+
+.social-link {
+width: 45px;
+height: 45px;
+border-radius: 8px;
+display: flex;
+align-items: center;
+justify-content: center;
+transition: all 0.3s ease;
+text-decoration: none;
+font-size: 20px;
+position: relative;
+}
+
+.social-link.instagram {
+background: linear-gradient(45deg, #f09433 0%, #e6683c 25%, #dc2743 50%, #cc2366 75%, #bc1888 100%);
+color: white;
+}
+
+.social-link.telegram {
+background: #0088cc;
+color: white;
+}
+
+.social-link.six-app {
+background: #333;
+color: white;
+border: 1px solid #555;
+font-size: 16px;
+font-weight: bold;
+}
+
+.social-link.more {
+background: #333;
+color: #ccc;
+border: 1px solid #555;
+font-size: 14px;
+}
+
+.social-link:hover {
+transform: translateY(-2px) scale(1.05);
+box-shadow: 0 6px 20px rgba(0, 0, 0, 0.4);
+}
+
+/* Поддержка - улучшенная с картинкой */
+.sidebar-support {
+background: linear-gradient(135deg, #333 0%, #444 100%);
+margin: 15px;
+border-radius: 10px;
+padding: 15px;
+display: flex;
+align-items: center;
+gap: 12px;
+cursor: pointer;
+transition: all 0.3s ease;
+box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.sidebar-support:hover {
+background: linear-gradient(135deg, #444 0%, #555 100%);
+transform: translateY(-2px);
+box-shadow: 0 6px 20px rgba(0, 0, 0, 0.4);
+}
+
+.support-icon {
+font-size: 20px;
+color: var(--accent-color);
+width: 20px;
+height: 20px;
+background-image: url('https://cdn-icons-png.flaticon.com/512/78/78925.png');
+background-size: contain;
+background-repeat: no-repeat;
+background-position: center;
+}
+
+.support-text {
+color: white;
+font-size: 13px;
+font-weight: 500;
+}
+
+.support-24-7 {
+background: #2196f3;
+color: white;
+border-radius: 12px;
+padding: 2px 8px;
+font-size: 10px;
+font-weight: bold;
+margin-left: auto;
+}
+
+/* Верхняя панель - УБРАНЫ ФЛАГИ */
+.top-header {
+position: fixed;
+top: 0;
+left: 280px;
+right: 0;
+background: linear-gradient(135deg, var(--bg-panel) 0%, var(--bg-card) 100%);
+height: 60px;
+display: flex;
+align-items: center;
+justify-content: space-between;
+padding: 0 30px;
+z-index: 1000;
+box-shadow: 0 2px 10px rgba(0, 0, 0, 0.5);
+border-bottom: 1px solid var(--border-color);
+}
+
+/* Переключатель темы */
+.theme-switcher {
+display: flex;
+gap: 10px;
+align-items: center;
+}
+
+.theme-btn {
+width: 30px;
+height: 30px;
+border-radius: 50%;
+border: 2px solid transparent;
+cursor: pointer;
+transition: all 0.3s ease;
+}
+
+.theme-btn.black {
+background: #1a1a1a;
+}
+
+.theme-btn.red {
+background: #ff6b6b;
+}
+
+.theme-btn.white {
+background: #ffffff;
+}
+
+.theme-btn.active {
+border-color: var(--accent-color);
+transform: scale(1.2);
+}
+
+.theme-btn:hover {
+transform: scale(1.1);
+}
+
+/* Левая часть - логотип БЕЗ языка */
+.top-left-section {
+display: flex;
+align-items: center;
+gap: 20px;
+}
+
+.top-logo {
+display: flex;
+align-items: center;
+font-size: 28px;
+font-weight: bold;
+}
+
+.logo-x {
+color: var(--accent-orange);
+font-size: 32px;
+}
+
+.logo-rocket {
+color: var(--text-primary);
+font-size: 28px;
+}
+
+/* Правая часть - баланс и вход */
+.top-right-section {
+display: flex;
+align-items: center;
+gap: 20px;
+}
+
+.top-balance-section {
+background: var(--bg-card);
+border-radius: 15px;
+padding: 8px 15px;
+text-align: center;
+box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+display: flex;
+align-items: center;
+gap: 15px;
+border: 1px solid var(--border-color);
+position: relative;
+cursor: pointer;
+}
+
+.top-balance-info {
+display: flex;
+flex-direction: column;
+align-items: center;
+}
+
+.top-balance-title {
+font-size: 12px;
+color: var(--text-secondary);
+margin-bottom: 2px;
+}
+
+.top-balance-amount {
+font-size: 18px;
+font-weight: bold;
+color: var(--accent-color);
+}
+
+/* Выпадающее меню валют */
+.currency-dropdown {
+position: absolute;
+top: 100%;
+right: 0;
+background: var(--bg-panel);
+border: 1px solid var(--border-color);
+border-radius: 10px;
+padding: 10px;
+min-width: 200px;
+box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+z-index: 1001;
+display: none;
+}
+
+.currency-dropdown.active {
+display: block;
+}
+
+.currency-selector {
+display: flex;
+gap: 8px;
+margin-bottom: 15px;
+flex-wrap: wrap;
+}
+
+.currency-btn {
+background: var(--bg-card);
+border: 1px solid var(--border-color);
+border-radius: 8px;
+color: var(--text-primary);
+padding: 6px 12px;
+font-size: 12px;
+cursor: pointer;
+transition: all 0.3s ease;
+}
+
+.currency-btn.active {
+background: linear-gradient(135deg, var(--accent-color), var(--accent-orange));
+color: #000;
+border-color: var(--accent-color);
+}
+
+.currency-btn:hover {
+background: var(--bg-panel);
+transform: translateY(-1px);
+}
+
+.balance-details {
+border-top: 1px solid var(--border-color);
+padding-top: 10px;
+}
+
+.balance-details-title {
+font-size: 12px;
+color: var(--text-secondary);
+margin-bottom: 8px;
+text-align: center;
+}
+
+.balance-item {
+display: flex;
+justify-content: space-between;
+align-items: center;
+padding: 4px 0;
+font-size: 12px;
+}
+
+.balance-currency {
+color: var(--text-secondary);
+}
+
+.balance-value {
+color: var(--accent-color);
+font-weight: bold;
+}
+
+.top-action-buttons {
+display: flex;
+gap: 8px;
+}
+
+.top-action-btn {
+border: none;
+border-radius: 6px;
+color: white;
+padding: 6px 12px;
+font-size: 12px;
+font-weight: bold;
+cursor: pointer;
+transition: all 0.3s ease;
+box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+}
+
+.top-withdraw-btn {
+background: linear-gradient(135deg, var(--accent-color) 0%, #ff0000 100%);
+}
+
+.top-deposit-btn {
+background: linear-gradient(135deg, #4caf50 0%, var(--accent-color) 100%);
+}
+
+.top-action-btn:hover {
+transform: translateY(-1px);
+box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4);
+}
+
+/* Кнопка обновления баланса - круглая */
+.refresh-balance-btn {
+background: linear-gradient(135deg, var(--accent-color), var(--accent-orange));
+border: none;
+border-radius: 50%;
+color: #000;
+width: 30px;
+height: 30px;
+font-size: 14px;
+font-weight: bold;
+cursor: pointer;
+transition: all 0.3s ease;
+box-shadow: 0 2px 8px rgba(255, 215, 0, 0.4);
+display: flex;
+align-items: center;
+justify-content: center;
+}
+
+.refresh-balance-btn:hover {
+transform: translateY(-1px) rotate(180deg);
+box-shadow: 0 4px 12px rgba(255, 215, 0, 0.6);
+}
+
+.top-login-section {
+background: var(--bg-card);
+border-radius: 15px;
+padding: 8px 15px;
+text-align: center;
+box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+display: flex;
+align-items: center;
+gap: 10px;
+border: 1px solid var(--border-color);
+}
+
+.top-login-btn {
+background: linear-gradient(135deg, var(--accent-color), var(--accent-orange));
+border: none;
+border-radius: 8px;
+color: #000;
+padding: 8px 16px;
+font-size: 14px;
+font-weight: bold;
+cursor: pointer;
+transition: all 0.3s ease;
+box-shadow: 0 4px 10px rgba(255, 215, 0, 0.3);
+}
+
+.top-login-btn:hover {
+transform: translateY(-2px);
+box-shadow: 0 6px 15px rgba(255, 215, 0, 0.4);
+}
+
+.top-user-info {
+display: none;
+align-items: center;
+gap: 10px;
+}
+
+.top-username {
+font-size: 14px;
+font-weight: bold;
+color: var(--accent-color);
+}
+
+/* Кнопка информации истории ставок */
+.history-btn {
+background: linear-gradient(135deg, #4a90e2 0%, #357abd 100%);
+border: 2px solid #ffffff;
+color: white;
+width: 20px;
+height: 20px;
+border-radius: 50%;
+cursor: pointer;
+font-size: 12px;
+font-weight: bold;
+display: flex;
+align-items: center;
+justify-content: center;
+transition: all 0.3s ease;
+box-shadow: 0 2px 8px rgba(74, 144, 226, 0.4);
+position: relative;
+font-family: 'Times New Roman', serif;
+}
+
+.history-btn:hover {
+transform: translateY(-2px) scale(1.1);
+box-shadow: 0 4px 15px rgba(74, 144, 226, 0.6);
+background: linear-gradient(135deg, #5ba0f2 0%, #4080cd 100%);
+}
+
+/* Основной контейнер приложения */
+.main-container {
+display: flex;
+gap: 20px;
+margin-top: 80px;
+margin-left: 300px;
+width: calc(100% - 320px);
+max-width: 1400px;
+padding: 0 20px;
+}
+
+/* Панель игроков - отдельное окно */
+.players-window {
+background: var(--bg-panel);
+border-radius: 25px;
+padding: 20px;
+width: 250px;
+height: 600px;
+box-shadow: 0 15px 40px rgba(0, 0, 0, 0.6);
+border: 2px solid var(--border-color);
+position: relative;
+overflow: hidden;
+display: flex;
+flex-direction: column;
+gap: 10px;
+}
+
+.players-container {
+flex: 1;
+overflow-y: auto;
+display: flex;
+flex-direction: column;
+gap: 10px;
+}
+
+/* Скрыть полосу прокрутки */
+.players-container::-webkit-scrollbar {
+display: none;
+}
+
+.players-container {
+-ms-overflow-style: none;
+scrollbar-width: none;
+}
+
+/* Информация о игроках в самом верху над всеми игроками */
+.players-info {
+background: var(--bg-card);
+border-radius: 10px;
+padding: 12px 15px;
+margin-bottom: 15px;
+display: flex;
+justify-content: space-between;
+align-items: center;
+border: 1px solid var(--border-color);
+}
+
+.players-count {
+display: flex;
+align-items: center;
+gap: 8px;
+font-size: 14px;
+font-weight: bold;
+color: var(--text-primary);
+}
+
+.green-dot {
+width: 8px;
+height: 8px;
+background: #4caf50;
+border-radius: 50%;
+animation: blink 1.5s infinite;
+}
+
+@keyframes blink {
+0%, 50% { opacity: 1; }
+51%, 100% { opacity: 0.3; }
+}
+
+.total-bets {
+font-size: 14px;
+font-weight: bold;
+color: var(--accent-color);
+}
+
+.player-card {
+background: var(--bg-card);
+border-radius: 10px;
+padding: 10px;
+transition: all 0.3s ease;
+opacity: 0;
+transform: translateY(20px);
+animation: slideIn 0.5s ease forwards;
+}
+
+@keyframes slideIn {
+to {
+  opacity: 1;
+  transform: translateY(0);
+}
+}
+
+.player-card.current-player {
+border: 2px solid var(--accent-color);
+background: var(--bg-panel);
+}
+
+.player-card.won {
+background: rgba(39, 174, 96, 0.2);
+border: 1px solid rgba(39, 174, 96, 0.4);
+}
+
+.player-card.lost {
+background: rgba(192, 57, 43, 0.3);
+border: 1px solid rgba(192, 57, 43, 0.5);
+}
+
+.player-name {
+font-weight: bold;
+font-size: 14px;
+margin-bottom: 5px;
+}
+
+.player-bet {
+font-size: 12px;
+color: var(--text-secondary);
+}
+
+.player-win {
+font-size: 12px;
+color: #2ecc71;
+font-weight: bold;
+margin-top: 5px;
+}
+
+/* Единое большое окно */
+.unified-window {
+background: var(--bg-panel);
+border-radius: 25px;
+padding: 30px;
+width: 100%;
+box-shadow: 0 15px 40px rgba(0, 0, 0, 0.6);
+border: 2px solid var(--border-color);
+position: relative;
+overflow: hidden;
+display: grid;
+grid-template-columns: 1fr 300px;
+gap: 30px;
+min-height: 600px;
+}
+
+/* Игровая секция */
+.game-section {
+display: flex;
+flex-direction: column;
+justify-content: space-between;
+position: relative;
+}
+
+/* История множителей внутри игрового поля */
+.in-game-multipliers-history {
+position: absolute;
+top: 0;
+left: 0;
+right: 0;
+background: var(--bg-card);
+border-radius: 10px;
+padding: 8px 15px;
+box-shadow: 0 3px 10px rgba(0, 0, 0, 0.3);
+border: 1px solid var(--border-color);
+backdrop-filter: blur(5px);
+z-index: 5;
+}
+
+.in-game-history-title {
+text-align: center;
+font-size: 10px;
+margin-bottom: 6px;
+color: var(--text-secondary);
+}
+
+.in-game-history-grid {
+display: grid;
+grid-template-columns: repeat(auto-fill, minmax(30px, 1fr));
+gap: 4px;
+max-height: 40px;
+overflow-y: auto;
+}
+
+.in-game-history-item {
+background: var(--bg-card);
+border-radius: 3px;
+padding: 2px;
+text-align: center;
+font-size: 8px;
+font-weight: bold;
+color: var(--text-primary);
+border: 1px solid transparent;
+transition: all 0.3s ease;
+}
+
+.in-game-history-item.green {
+background: linear-gradient(135deg, #27ae60, #2ecc71);
+border-color: #27ae60;
+}
+
+.in-game-history-item.purple {
+background: linear-gradient(135deg, #8e44ad, #9b59b6);
+border-color: #8e44ad;
+}
+
+.in-game-history-item.orange {
+background: linear-gradient(135deg, #e67e22, #f39c12);
+border-color: #e67e22;
+}
+
+.in-game-history-item.red {
+background: linear-gradient(135deg, #c0392b, #e74c3c);
+border-color: #c0392b;
+}
+
+/* Игровое поле */
+.game-field {
+display: flex;
+gap: 40px;
+margin-top: 120px;
+height: 400px;
+}
+
+/* Левая часть - ракета */
+.rocket-section {
+flex: 1;
+display: flex;
+justify-content: center;
+align-items: center;
+position: relative;
+}
+
+/* Правая часть - управление - РАСШИРЕНО ВНИЗ ДЛЯ АВТОКЕШАУТА */
+.control-section {
+flex: 1;
+display: flex;
+flex-direction: column;
+justify-content: center;
+margin-top: 30px;
+}
+
+/* Контейнер ракеты */
+.rocket-container {
+position: relative;
+height: 280px;
+width: 100%;
+display: flex;
+justify-content: center;
+align-items: center;
+}
+
+#rocket-3d-wrapper {
+pointer-events: none;
+position: relative;
+z-index: 0;
+}
+
+/* Контейнер заправки */
+.refueling-container {
+display: none;
+flex-direction: column;
+align-items: center;
+justify-content: center;
+height: 100%;
+text-align: center;
+}
+
+.refueling-rocket-icon {
+width: 80px;
+height: 80px;
+margin-bottom: 20px;
+animation: float 2s ease-in-out infinite;
+}
+
+.refueling-text {
+font-size: 24px;
+font-weight: bold;
+color: var(--accent-color);
+margin-bottom: 30px;
+text-shadow: 0 0 10px rgba(255, 215, 0, 0.5);
+}
+
+.progress-bar-container {
+width: 200px;
+height: 20px;
+background: rgba(255, 255, 255, 0.1);
+border-radius: 10px;
+overflow: hidden;
+position: relative;
+}
+
+.progress-bar {
+height: 100%;
+background: linear-gradient(90deg, var(--accent-orange), var(--accent-color));
+width: 0%;
+transition: width 0.1s ease;
+border-radius: 10px;
+box-shadow: 0 0 10px rgba(255, 215, 0, 0.5);
+}
+
+/* CSS Ракета - новый дизайн */
+.css-rocket-container {
+position: relative;
+display: none;
+justify-content: center;
+align-items: center;
+height: 100%;
+width: 100%;
+}
+
+.scene {
+width: 202px;
+height: 380px;
+background: transparent;
+animation: vibration 0.2s infinite;
+position: relative;
+margin: auto;
+top: 0;
+left: 0;
+right: 0;
+bottom: 0;
+transform: rotate(45deg);
+transition: all 0.5s ease;
+}
+
+.scene.game-active {
+animation: vibrationActive 0.15s infinite;
+}
+
+.scene.launching {
+animation: rocketLaunch 2s ease-out forwards;
+}
+
+@keyframes rocketLaunch {
+0% {
+  transform: rotate(45deg) translate(150px, 150px) scale(0.5);
+}
+100% {
+  transform: rotate(45deg) translate(0px, 0px) scale(1);
+}
+}
+
+.wing-left {
+position: absolute;
+z-index: 10;
+height: 103px;
+width: 0px;
+padding: 0px;
+top: 82px;
+left: 16px;
+transform: rotate(10deg) skew(5deg);
+border-top: 21px solid transparent;
+border-right: 38px solid #743388;
+border-bottom: 19px solid transparent;
+}
+
+.wing-left:after {
+content: "";
+display: block;
+position: absolute;
+bottom: -50px;
+height: 0px;
+width: 0px;
+border-top: 20px solid transparent;
+border-right: 50px solid var(--bg-primary);
+border-bottom: 50px solid transparent;
+}
+
+.wing-right {
+position: absolute;
+z-index: 10;
+height: 103px;
+width: 0px;
+padding: 0px;
+top: 62px;
+right: 17px;
+transform: rotate(-10deg) skew(-5deg);
+border-top: 0 solid transparent;
+border-right: 40px solid #743388;
+border-bottom: 15px solid transparent;
+}
+
+.wing-right:after {
+content: "";
+display: block;
+position: absolute;
+top: -33px;
+left: -19px;
+height: 0px;
+width: 0px;
+border-top: 36px solid transparent;
+border-right: 68px solid var(--bg-primary);
+border-bottom: 45px solid transparent;
+}
+
+.exhaust {
+position: absolute;
+z-index: 20;
+top: 156px;
+left: 51px;
+height: 0px;
+width: 101px;
+border-top: 23px solid #743388;
+border-left: 9px solid transparent;
+border-right: 8px solid transparent;
+}
+
+.capsule {
+position: absolute;
+z-index: 30;
+background: transparent;
+left: 46px;
+top: 5px;
+width: 111px;
+height: 156px;
+opacity: 1;
+overflow: hidden;
+}
+
+.capsule .base {
+position: absolute;
+background: #ccc;
+width: 112px;
+height: 94px;
+top: 62px;
+left: 0px;
+background: linear-gradient(to right, #F3F3F3 0%, #F3F3F3 65%, #E0E0E0 65%, #E0E0E0 100%);
+}
+
+.capsule .top {
+position: absolute;
+height: 0px;
+width: 0px;
+padding: 0px;
+left: 0;
+border-left: 56px solid transparent;
+border-right: 56px solid transparent;
+border-bottom: 62px solid #F3F3F3;
+}
+
+.capsule .top:after {
+content: "";
+position: absolute;
+height: 0px;
+width: 0px;
+border-left: 0px solid transparent;
+border-right: 156px solid transparent;
+border-bottom: 84px solid var(--bg-primary);
+transform: skew(42deg);
+top: -14px;
+left: 25px;
+z-index: 50;
+}
+
+.capsule .top .shadow {
+position: absolute;
+height: 0px;
+width: 0px;
+border-left: 20px solid transparent;
+border-right: 80px solid transparent;
+border-bottom: 90px solid #E0E0E0;
+transform: skew(26deg);
+top: -20px;
+left: -3px;
+z-index: 40;
+}
+
+.window-big {
+width: 70px;
+height: 70px;
+background: #743388;
+border-radius: 8em;
+position: absolute;
+z-index: 40;
+top: 57px;
+left: 66px;
+}
+
+.window-small {
+width: 44px;
+height: 44px;
+background: #272425;
+border-radius: 8em;
+position: absolute;
+z-index: 50;
+top: 70px;
+left: 79px;
+}
+
+.propulsed__slow {
+animation: fire_propulsion 0.3s ease-in infinite;
+}
+
+.main_fire {
+animation: main_fire 0.1s cubic-bezier(0.175, 0.885, 0.420, 1.410) infinite;
+}
+
+.fire-1 {
+position: absolute;
+height: 70px;
+width: 70px;
+top: 169px;
+transform-origin: 50% 50%;
+transform: rotate(-40deg) skew(1deg, -11deg);
+z-index: 10;
+left: 64px;
+background: linear-gradient(135deg, #EF8B32 0%, #EF8B32 50%, #E82134 50%, #E82134 100%);
+animation: main_fire 0.1s cubic-bezier(0.175, 0.885, 0.420, 1.410) infinite;
+}
+
+.fire-2 {
+position: absolute;
+height: 55px;
+width: 55px;
+top: 180px;
+transform-origin: 50% 50%;
+transform: rotate(-33deg) skew(0deg, -30deg);
+z-index: 15;
+left: 58px;
+background: linear-gradient(135deg, #E82134 0%, #E82134 50%, #EF8B32 50%, #EF8B32 100%);
+animation: fire_propulsion 0.3s ease-in infinite;
+animation-delay: 0.2s;
+}
+
+.fire-3 {
+position: absolute;
+height: 22px;
+width: 22px;
+top: 196px;
+left: 58px;
+transform-origin: 50% 50%;
+transform: rotate(-33deg) skew(0deg, -30deg);
+z-index: 20;
+background: linear-gradient(135deg, #EF8B32 0%, #EF8B32 50%, #E82134 50%, #E82134 100%);
+animation: fire_propulsion 0.3s ease-in infinite;
+animation-delay: 0.2s;
+}
+
+.fire-4 {
+position: absolute;
+height: 22px;
+width: 22px;
+top: 200px;
+transform-origin: 50% 50%;
+transform: rotate(-33deg) skew(0deg, -30deg);
+z-index: 20;
+left: 126px;
+background: linear-gradient(135deg, #E82134 0%, #E82134 50%, #EF8B32 50%, #EF8B32 100%);
+animation: fire_propulsion 0.3s ease-in infinite;
+}
+
+.propulsed {
+animation: dancing_fire 0.24s infinite;
+}
+
+.spark-1 {
+position: absolute;
+bottom: 177px;
+z-index: 20;
+right: 70px;
+width: 12px;
+height: 12px;
+background: #EF8B32;
+transform-origin: 50% 50%;
+animation: dancing_fire 0.24s infinite;
+}
+
+.spark-2 {
+position: absolute;
+bottom: 147px;
+z-index: 20;
+left: 52px;
+width: 10px;
+height: 10px;
+transform: rotate(45deg);
+background: #EF8B32;
+animation: dancing_fire 0.24s infinite;
+animation-delay: 0.22s;
+}
+
+.spark-3 {
+position: absolute;
+bottom: 90px;
+z-index: 20;
+left: 109px;
+width: 10px;
+height: 10px;
+transform: rotate(45deg);
+background: #E82134;
+animation: dancing_fire 0.24s infinite;
+animation-delay: 0.32s;
+}
+
+.spark-4 {
+position: absolute;
+bottom: 20px;
+left: 83px;
+z-index: 20;
+width: 10px;
+height: 10px;
+background: #EF8B32;
+animation: dancing_fire 0.24s infinite;
+animation-delay: 0.16s;
+}
+
+.hyperspace {
+animation: hyperspace 0.4s infinite;
+}
+
+.star {
+position: absolute;
+width: 4px;
+height: 20px;
+background: #fff;
+z-index: 90;
+animation: hyperspace 0.4s infinite;
+}
+
+.star.star--1 {
+left: 50px;
+top: -10px;
+animation-delay: 0.10s;
+}
+
+.star.star--2 {
+right: 60px;
+top: 30px;
+animation-delay: 0.10s;
+}
+
+.star.star--3 {
+top: 80px;
+left: 25px;
+animation-delay: 0.2s;
+}
+
+.star.star--4 {
+top: -20px;
+right: 75px;
+animation-delay: 0.2s;
+}
+
+.star.star--5 {
+right: 30px;
+top: -60px;
+animation-delay: 0.30s;
+}
+
+.star.star--6 {
+right: 160px;
+top: 50px;
+animation-delay: 0.40s;
+}
+
+.star.star--7 {
+top: 20px;
+left: 75px;
+animation-delay: 0.3s;
+}
+
+.star.star--8 {
+top: -30px;
+right: 95px;
+animation-delay: 0.4s;
+}
+
+.star.star--9 {
+right: 30px;
+top: -60px;
+animation-delay: 0.30s;
+}
+
+.star.star--10 {
+right: 160px;
+top: 50px;
+animation-delay: 0.40s;
+}
+
+.star.star--11 {
+top: 20px;
+left: 75px;
+animation-delay: 0.3s;
+}
+
+.star.star--12 {
+top: -30px;
+right: 95px;
+animation-delay: 0.4s;
+}
+
+.star.star--13 {
+left: -30px;
+top: -60px;
+animation-delay: 0.30s;
+}
+
+.star.star--14 {
+right: -20px;
+top: 50px;
+animation-delay: 0.40s;
+}
+
+.star.star--15 {
+top: 20px;
+left: -75px;
+animation-delay: 0.3s;
+}
+
+.star.star--16 {
+top: -30px;
+right: -95px;
+animation-delay: 0.4s;
+}
+
+@keyframes dancing_fire {
+0% {
+  transform-origin: 50% 50%;
+  transform: translate(0, -10px) scale(1);
+  opacity: 1;
+}
+100% {
+  transform: translate(0, 50px) scale(1);
+  opacity: 0;
+}
+}
+
+@keyframes fire_propulsion {
+0% {
+  transform: translate(0, -10px) scale(1) rotate(-33deg) skew(0deg, -30deg);
+  transform-origin: 50% 50%;
+  opacity: 1;
+}
+100% {
+  transform: translate(0, 50px) scale(0.7) rotate(-33deg) skew(0deg, -30deg);
+  opacity: 0;
+}
+}
+
+@keyframes main_fire {
+0% {
+  transform: translate(0, 5px) scale(1.1, 1) rotate(-33deg) skew(0deg, -30deg);
+}
+100% {
+  transform: translate(0, 0px) scale(1, 1.4) rotate(-33deg) skew(0deg, -30deg);
+}
+}
+
+@keyframes vibration {
+0% {
+  transform: scale(1) translate(0, 0) rotate(45deg);
+}
+50% {
+  transform: scale(1) translate(1px, -1px) rotate(45deg);
+}
+100% {
+  transform: scale(1) translate(0, 0) rotate(45deg);
+}
+}
+
+@keyframes vibrationActive {
+0% {
+  transform: scale(1) translate(0, 0) rotate(45deg);
+}
+25% {
+  transform: scale(1.02) translate(2px, -1px) rotate(46deg);
+}
+50% {
+  transform: scale(1.01) translate(1px, -2px) rotate(45deg);
+}
+75% {
+  transform: scale(1.02) translate(-1px, -1px) rotate(44deg);
+}
+100% {
+  transform: scale(1) translate(0, 0) rotate(45deg);
+}
+}
+
+@keyframes hyperspace {
+0% {
+  transform: translate(0, -100px) scale(1, 0);
+  opacity: 1;
+}
+100% {
+  transform: translate(0, 400px) scale(1, 1);
+  opacity: 0;
+}
+}
+
+/* Обновленная ракета с оранжевыми элементами и дополнительными анимациями */
+.rocket {
+position: relative;
+width: 60px;
+height: 180px;
+transform: translateY(30px);
+animation: rocketFloat 3s ease-in-out infinite;
+}
+
+.rocket-body {
+position: absolute;
+width: 60px;
+height: 150px;
+background: linear-gradient(to right, #ff8c00, #ffa500, #ff8c00);
+border-radius: 30px;
+top: 0;
+left: 0;
+z-index: 2;
+box-shadow:
+  inset 0 0 20px rgba(255, 140, 0, 0.3),
+  0 0 30px rgba(255, 140, 0, 0.4);
+animation: rocketBodyGlow 2s ease-in-out infinite alternate;
+}
+
+.rocket-top {
+position: absolute;
+width: 60px;
+height: 30px;
+background: linear-gradient(135deg, #ff6600, #ff8c00);
+border-radius: 30px 30px 0 0;
+top: 0;
+left: 0;
+box-shadow: 0 0 15px rgba(255, 102, 0, 0.5);
+animation: rocketTopPulse 1.5s ease-in-out infinite;
+}
+
+.rocket-fin-left, .rocket-fin-right {
+position: absolute;
+width: 20px;
+height: 60px;
+background: linear-gradient(135deg, #ff4500, #ff6600);
+top: 90px;
+box-shadow: 0 0 10px rgba(255, 69, 0, 0.4);
+animation: finWobble 2.5s ease-in-out infinite;
+}
+
+.rocket-fin-left {
+left: -15px;
+transform: rotate(-20deg);
+border-radius: 5px 0 0 5px;
+animation-delay: 0.2s;
+}
+
+.rocket-fin-right {
+right: -15px;
+transform: rotate(20deg);
+border-radius: 0 5px 5px 0;
+animation-delay: 0.4s;
+}
+
+.rocket-fire {
+position: absolute;
+width: 30px;
+height: 50px;
+background: linear-gradient(to top, var(--accent-orange), #ff4500, #ff0000);
+border-radius: 50% 50% 0 0;
+bottom: -30px;
+left: 50%;
+transform: translateX(-50%);
+z-index: 1;
+animation: rocketFire 0.3s infinite alternate;
+box-shadow:
+  0 0 20px #ff4500,
+  0 0 40px rgba(255, 69, 0, 0.6);
+}
+
+/* Дополнительные анимации для ракеты */
+@keyframes rocketFloat {
+0%, 100% {
+  transform: translateY(30px) rotate(0deg);
+}
+25% {
+  transform: translateY(25px) rotate(1deg);
+}
+50% {
+  transform: translateY(20px) rotate(0deg);
+}
+75% {
+  transform: translateY(25px) rotate(-1deg);
+}
+}
+
+@keyframes rocketBodyGlow {
+0% {
+  box-shadow:
+    inset 0 0 20px rgba(255, 140, 0, 0.3),
+    0 0 30px rgba(255, 140, 0, 0.4);
+}
+100% {
+  box-shadow:
+    inset 0 0 30px rgba(255, 140, 0, 0.5),
+    0 0 50px rgba(255, 140, 0, 0.7);
+}
+}
+
+@keyframes rocketTopPulse {
+0%, 100% {
+  transform: scale(1);
+  box-shadow: 0 0 15px rgba(255, 102, 0, 0.5);
+}
+50% {
+  transform: scale(1.05);
+  box-shadow: 0 0 25px rgba(255, 102, 0, 0.8);
+}
+}
+
+@keyframes finWobble {
+0%, 100% {
+  transform: rotate(-20deg) scale(1);
+}
+50% {
+  transform: rotate(-18deg) scale(1.02);
+}
+}
+
+@keyframes rocketFire {
+0% {
+  height: 50px;
+  box-shadow:
+    0 0 20px #ff4500,
+    0 0 40px rgba(255, 69, 0, 0.6);
+  transform: translateX(-50%) scaleX(1);
+}
+100% {
+  height: 65px;
+  box-shadow:
+    0 0 30px #ff0000,
+    0 0 60px rgba(255, 0, 0, 0.8);
+  transform: translateX(-50%) scaleX(1.1);
+}
+}
+
+/* Анимация для активной ракеты во время игры */
+.rocket.active {
+animation: rocketActive 1s ease-in-out infinite;
+}
+
+@keyframes rocketActive {
+0%, 100% {
+  transform: translateY(30px) rotate(0deg) scale(1);
+}
+25% {
+  transform: translateY(20px) rotate(2deg) scale(1.02);
+}
+50% {
+  transform: translateY(10px) rotate(0deg) scale(1.05);
+}
+75% {
+  transform: translateY(20px) rotate(-2deg) scale(1.02);
+}
+}
+
+/* Дополнительные эффекты свечения для активной ракеты */
+.rocket.active .rocket-body {
+animation: activeBodyGlow 0.8s ease-in-out infinite alternate;
+}
+
+@keyframes activeBodyGlow {
+0% {
+  box-shadow:
+    inset 0 0 30px rgba(255, 140, 0, 0.5),
+    0 0 50px rgba(255, 140, 0, 0.7),
+    0 0 80px rgba(255, 140, 0, 0.3);
+}
+100% {
+  box-shadow:
+    inset 0 0 50px rgba(255, 140, 0, 0.8),
+    0 0 80px rgba(255, 140, 0, 1),
+    0 0 120px rgba(255, 140, 0, 0.5);
+}
+}
+
+.rocket.active .rocket-fire {
+animation: activeFire 0.2s infinite alternate;
+}
+
+@keyframes activeFire {
+0% {
+  height: 60px;
+  box-shadow:
+    0 0 30px #ff4500,
+    0 0 60px rgba(255, 69, 0, 0.8),
+    0 0 100px rgba(255, 0, 0, 0.4);
+}
+100% {
+  height: 80px;
+  box-shadow:
+    0 0 50px #ff0000,
+    0 0 100px rgba(255, 0, 0, 1),
+    0 0 150px rgba(255, 0, 0, 0.6);
+}
+}
+
+/* Взрыв - ИСПОЛЬЗУЕМ ПРИКРЕПЛЕННЫЙ ГИФ */
+.explosion {
+position: absolute;
+top: 50%;
+left: 50%;
+transform: translate(-50%, -50%);
+z-index: 10;
+}
+
+.explosion img {
+width: 200px;
+height: 200px;
+object-fit: contain;
+}
+
+/* Анимация выигрыша */
+.win-animation {
+position: absolute;
+top: 50%;
+left: 50%;
+transform: translate(-50%, -50%);
+font-size: 24px;
+font-weight: bold;
+color: #4caf50;
+text-shadow: 0 0 10px rgba(76, 175, 80, 0.8);
+z-index: 15;
+pointer-events: none;
+animation: winFloat 2s ease-out forwards;
+}
+
+@keyframes winFloat {
+0% {
+  opacity: 1;
+  transform: translate(-50%, -50%) scale(1);
+}
+100% {
+  opacity: 0;
+  transform: translate(-50%, -150%) scale(0.8);
+}
+}
+
+/* Множитель - ПОДНЯТ НА 20 ПИКСЕЛЕЙ */
+.multiplier-container {
+margin-bottom: 25px;
+margin-top: -20px;
+text-align: center;
+}
+
+.multiplier-label {
+font-size: 18px;
+margin-bottom: 10px;
+color: var(--text-secondary);
+}
+
+.multiplier {
+background: var(--bg-card);
+border: 2px solid rgba(100, 100, 150, 0.3);
+border-radius: 12px;
+padding: 12px 30px;
+font-size: 48px;
+font-weight: bold;
+color: var(--accent-color);
+text-align: center;
+min-width: 180px;
+box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+display: inline-block;
+}
+
+/* Поле ставки - ПОДНЯТО НА 20 ПИКСЕЛЕЙ */
+.bet-input-container {
+background: var(--bg-card);
+border-radius: 15px;
+padding: 20px;
+margin-bottom: 15px;
+margin-top: -20px;
+box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+border: 1px solid var(--border-color);
+text-align: center;
+}
+
+.bet-label {
+display: block;
+font-size: 18px;
+margin-bottom: 15px;
+color: var(--text-secondary);
+font-weight: bold;
+}
+
+.bet-input-wrapper {
+position: relative;
+display: inline-block;
+width: 100%;
+max-width: 250px;
+margin-bottom: 15px;
+}
+
+.bet-input {
+background: var(--bg-panel);
+border: 2px solid var(--accent-orange);
+border-radius: 15px;
+color: var(--text-primary);
+font-size: 20px;
+padding: 15px;
+width: 100%;
+text-align: center;
+outline: none;
+transition: all 0.3s ease;
+}
+
+.bet-input:focus {
+border-color: var(--accent-color);
+box-shadow: 0 0 15px rgba(255, 215, 0, 0.5);
+}
+
+/* Кнопки быстрых ставок - В ТОМ ЖЕ ОКНЕ */
+.bet-quick-buttons {
+display: flex;
+justify-content: center;
+gap: 8px;
+}
+
+.bet-quick-btn {
+background: #2a2a2a;
+border: 1px solid #444;
+border-radius: 8px;
+color: var(--text-primary);
+padding: 8px 12px;
+font-size: 12px;
+font-weight: bold;
+cursor: pointer;
+transition: all 0.3s ease;
+}
+
+.bet-quick-btn:hover {
+background: #3a3a3a;
+border-color: var(--accent-color);
+transform: translateY(-1px);
+}
+
+/* Авто кешаут - ПОДНЯТ НА 20 ПИКСЕЛЕЙ */
+.auto-cashout-container {
+background: var(--bg-card);
+border-radius: 15px;
+padding: 20px;
+margin-bottom: 20px;
+margin-top: -20px;
+box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+border: 1px solid var(--border-color);
+}
+
+.auto-cashout-toggle {
+display: flex;
+align-items: center;
+justify-content: center;
+gap: 15px;
+margin-bottom: 15px;
+}
+
+.auto-cashout-label {
+font-size: 16px;
+color: var(--text-primary);
+font-weight: bold;
+}
+
+/* Переключатель переключателя */
+.toggle-switch {
+position: relative;
+width: 60px;
+height: 30px;
+background: #333;
+border-radius: 15px;
+cursor: pointer;
+transition: all 0.3s ease;
+border: 2px solid #555;
+}
+
+.toggle-switch.active {
+background: linear-gradient(135deg, var(--accent-color), var(--accent-orange));
+border-color: var(--accent-color);
+box-shadow: 0 0 15px rgba(255, 215, 0, 0.5);
+}
+
+.toggle-slider {
+position: absolute;
+top: 2px;
+left: 2px;
+width: 22px;
+height: 22px;
+background: white;
+border-radius: 50%;
+transition: all 0.3s ease;
+box-shadow: 0 2px 5px rgba(0, 0, 0, 0.3);
+}
+
+.toggle-switch.active .toggle-slider {
+transform: translateX(28px);
+background: #000;
+}
+
+.auto-cashout-input {
+background: var(--bg-panel);
+border: 2px solid #6a11cb;
+border-radius: 12px;
+color: var(--text-primary);
+font-size: 16px;
+padding: 10px;
+width: 100px;
+text-align: center;
+outline: none;
+transition: all 0.3s ease;
+}
+
+.auto-cashout-input:focus {
+border-color: #2575fc;
+box-shadow: 0 0 15px rgba(106, 17, 203, 0.5);
+}
+
+.auto-cashout-input:disabled {
+opacity: 0.5;
+cursor: not-allowed;
+border-color: #333;
+}
+
+.auto-cashout-input.active {
+border-color: var(--accent-color);
+}
+
+.auto-cashout-input.active:focus {
+border-color: var(--accent-orange);
+box-shadow: 0 0 15px rgba(255, 215, 0, 0.5);
+}
+
+/* Кнопки - СДЕЛАНА КНОПКА ПОСТАВИТЬ БОЛЬШЕ */
+.buttons-container {
+display: flex;
+flex-direction: column;
+align-items: center;
+gap: 15px;
+margin-top: 10px;
+}
+
+.btn {
+padding: 18px 35px;
+font-size: 22px;
+font-weight: bold;
+border-radius: 15px;
+border: none;
+cursor: pointer;
+transition: all 0.3s ease;
+width: 100%;
+max-width: 280px;
+box-shadow: 0 6px 18px rgba(0, 0, 0, 0.4);
+position: relative;
+}
+
+.bet-btn {
+background: linear-gradient(135deg, var(--accent-orange), var(--accent-color), var(--accent-orange));
+background-size: 200% auto;
+color: #000;
+animation: shine 2s linear infinite;
+}
+
+.take-btn {
+background: linear-gradient(135deg, #ff416c, #ff4b2b);
+color: white;
+display: none;
+flex-direction: column;
+align-items: center;
+justify-content: center;
+}
+
+.take-btn-amount {
+font-size: 14px;
+font-weight: normal;
+margin-top: 2px;
+opacity: 0.9;
+}
+
+.cancel-btn {
+background: linear-gradient(135deg, #6a11cb 0%, #2575fc 100%);
+color: white;
+display: none;
+}
+
+.btn:hover {
+transform: translateY(-3px);
+box-shadow: 0 10px 25px rgba(0, 0, 0, 0.5);
+}
+
+/* Статус игры */
+.game-status {
+text-align: center;
+font-size: 20px;
+height: 30px;
+color: var(--accent-color);
+margin-top: 20px;
+}
+
+/* Правая панель - бонусы */
+.bonus-section {
+background: var(--bg-card);
+border-radius: 20px;
+padding: 20px;
+height: 100%;
+box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+border: 1px solid var(--border-color);
+display: flex;
+flex-direction: column;
+gap: 20px;
+}
+
+.bonus-panel-title {
+font-size: 18px;
+font-weight: bold;
+color: var(--text-primary);
+text-align: center;
+text-transform: uppercase;
+display: flex;
+align-items: center;
+justify-content: center;
+gap: 8px;
+}
+
+.bonus-exclamation {
+background: linear-gradient(135deg, #ff6b6b, #ee5a24);
+color: white;
+border: none;
+border-radius: 50%;
+width: 20px;
+height: 20px;
+font-size: 12px;
+font-weight: bold;
+cursor: pointer;
+transition: all 0.3s ease;
+display: flex;
+align-items: center;
+justify-content: center;
+box-shadow: 0 2px 8px rgba(255, 107, 107, 0.4);
+}
+
+.bonus-exclamation:hover {
+transform: scale(1.1);
+box-shadow: 0 4px 12px rgba(255, 107, 107, 0.6);
+}
+
+/* Колесо фортуны */
+.fortune-wheel-container {
+position: relative;
+width: 200px;
+height: 200px;
+margin: 0 auto;
+}
+
+.fortune-wheel {
+width: 200px;
+height: 200px;
+border-radius: 50%;
+position: relative;
+overflow: hidden;
+border: 4px solid var(--accent-color);
+box-shadow: 0 0 20px rgba(255, 215, 0, 0.5);
+transition: transform 3s cubic-bezier(0.23, 1, 0.32, 1);
+}
+
+.wheel-segment {
+position: absolute;
+width: 50%;
+height: 50%;
+transform-origin: 100% 100%;
+display: flex;
+align-items: center;
+justify-content: center;
+font-weight: bold;
+font-size: 14px;
+color: white;
+text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.8);
+}
+
+.wheel-segment:nth-child(1) {
+background: linear-gradient(45deg, #ff6b6b, #ee5a24);
+transform: rotate(0deg);
+}
+
+.wheel-segment:nth-child(2) {
+background: linear-gradient(45deg, #4ecdc4, #44a08d);
+transform: rotate(45deg);
+}
+
+.wheel-segment:nth-child(3) {
+background: linear-gradient(45deg, #45b7d1, #96c93d);
+transform: rotate(90deg);
+}
+
+.wheel-segment:nth-child(4) {
+background: linear-gradient(45deg, #f093fb, #f5576c);
+transform: rotate(135deg);
+}
+
+.wheel-segment:nth-child(5) {
+background: linear-gradient(45deg, #4facfe, #00f2fe);
+transform: rotate(180deg);
+}
+
+.wheel-segment:nth-child(6) {
+background: linear-gradient(45deg, #43e97b, #38f9d7);
+transform: rotate(225deg);
+}
+
+.wheel-segment:nth-child(7) {
+background: linear-gradient(45deg, #fa709a, #fee140);
+transform: rotate(270deg);
+}
+
+.wheel-segment:nth-child(8) {
+background: linear-gradient(45deg, #a8edea, #fed6e3);
+transform: rotate(315deg);
+}
+
+.wheel-pointer {
+position: absolute;
+top: -10px;
+left: 50%;
+transform: translateX(-50%);
+width: 0;
+height: 0;
+border-left: 15px solid transparent;
+border-right: 15px solid transparent;
+border-top: 30px solid var(--accent-color);
+z-index: 10;
+filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.3));
+}
+
+.bonus-wheel-btn {
+background: linear-gradient(135deg, var(--accent-color), var(--accent-orange), var(--accent-color));
+background-size: 200% auto;
+border: 2px solid var(--accent-orange);
+border-radius: 12px;
+color: #000;
+padding: 12px 20px;
+font-size: 16px;
+font-weight: bold;
+cursor: pointer;
+transition: all 0.3s ease;
+box-shadow: 0 4px 15px rgba(255, 215, 0, 0.4);
+animation: goldShine 2s linear infinite;
+width: 100%;
+}
+
+@keyframes goldShine {
+to {
+  background-position: 200% center;
+}
+}
+
+.bonus-wheel-btn:hover {
+transform: translateY(-2px);
+box-shadow: 0 6px 20px rgba(255, 215, 0, 0.6);
+}
+
+.bonus-wheel-btn:disabled {
+background: #666;
+cursor: not-allowed;
+transform: none;
+animation: none;
+}
+
+/* VIP клуб */
+.vip-section {
+background: linear-gradient(135deg, #8e44ad, #9b59b6);
+border-radius: 15px;
+padding: 20px;
+text-align: center;
+border: 2px solid #ffd700;
+box-shadow: 0 0 20px rgba(255, 215, 0, 0.3);
+}
+
+.vip-title {
+font-size: 20px;
+font-weight: bold;
+color: #ffd700;
+margin-bottom: 10px;
+text-transform: uppercase;
+}
+
+.vip-price {
+font-size: 24px;
+font-weight: bold;
+color: white;
+margin-bottom: 15px;
+}
+
+.vip-benefits {
+font-size: 14px;
+color: #ddd;
+margin-bottom: 15px;
+line-height: 1.4;
+}
+
+.vip-btn {
+background: linear-gradient(135deg, #ffd700, #ffed4e);
+border: none;
+border-radius: 10px;
+color: #000;
+padding: 12px 24px;
+font-size: 16px;
+font-weight: bold;
+cursor: pointer;
+transition: all 0.3s ease;
+width: 100%;
+}
+
+.vip-btn:hover {
+transform: translateY(-2px);
+box-shadow: 0 6px 15px rgba(255, 215, 0, 0.4);
+}
+
+/* Чат поддержки */
+.support-chat {
+position: fixed;
+bottom: 20px;
+right: 20px;
+width: 350px;
+height: 450px;
+background: var(--bg-panel);
+border-radius: 15px;
+box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+border: 2px solid var(--border-color);
+display: none;
+flex-direction: column;
+z-index: 1001;
+}
+
+.support-chat.active {
+display: flex;
+}
+
+.support-chat-header {
+background: linear-gradient(135deg, var(--accent-color), var(--accent-orange));
+color: #000;
+padding: 15px;
+border-radius: 13px 13px 0 0;
+font-weight: bold;
+display: flex;
+justify-content: space-between;
+align-items: center;
+}
+
+.support-chat-close {
+background: none;
+border: none;
+color: #000;
+font-size: 18px;
+cursor: pointer;
+width: 25px;
+height: 25px;
+border-radius: 50%;
+display: flex;
+align-items: center;
+justify-content: center;
+transition: background 0.3s;
+}
+
+.support-chat-close:hover {
+background: rgba(0, 0, 0, 0.1);
+}
+
+.support-chat-messages {
+flex: 1;
+padding: 15px;
+overflow-y: auto;
+display: flex;
+flex-direction: column;
+gap: 10px;
+}
+
+.support-chat-messages::-webkit-scrollbar {
+width: 6px;
+}
+
+.support-chat-messages::-webkit-scrollbar-track {
+background: rgba(255, 255, 255, 0.1);
+border-radius: 3px;
+}
+
+.support-chat-messages::-webkit-scrollbar-thumb {
+background: rgba(255, 255, 255, 0.3);
+border-radius: 3px;
+}
+
+.chat-message {
+max-width: 80%;
+padding: 10px 15px;
+border-radius: 15px;
+font-size: 14px;
+line-height: 1.4;
+}
+
+.chat-message.user {
+background: var(--accent-color);
+color: #000;
+align-self: flex-end;
+border-bottom-right-radius: 5px;
+}
+
+.chat-message.support {
+background: var(--bg-card);
+color: var(--text-primary);
+align-self: flex-start;
+border-bottom-left-radius: 5px;
+border: 1px solid var(--border-color);
+}
+
+.chat-message.ai {
+background: linear-gradient(135deg, #4a90e2, #357abd);
+color: white;
+align-self: flex-start;
+border-bottom-left-radius: 5px;
+position: relative;
+}
+
+.chat-message.ai:before {
+content: '🤖';
+position: absolute;
+top: -8px;
+left: -8px;
+background: var(--accent-color);
+border-radius: 50%;
+width: 20px;
+height: 20px;
+display: flex;
+align-items: center;
+justify-content: center;
+font-size: 12px;
+}
+
+.support-chat-input-container {
+padding: 15px;
+border-top: 1px solid var(--border-color);
+display: flex;
+gap: 10px;
+}
+
+.support-chat-input {
+flex: 1;
+background: var(--bg-card);
+border: 2px solid var(--border-color);
+border-radius: 20px;
+color: var(--text-primary);
+padding: 10px 15px;
+outline: none;
+font-size: 14px;
+}
+
+.support-chat-input:focus {
+border-color: var(--accent-color);
+}
+
+.support-chat-send {
+background: linear-gradient(135deg, var(--accent-color), var(--accent-orange));
+border: none;
+border-radius: 50%;
+color: #000;
+width: 40px;
+height: 40px;
+cursor: pointer;
+display: flex;
+align-items: center;
+justify-content: center;
+font-size: 16px;
+transition: all 0.3s ease;
+}
+
+.support-chat-send:hover {
+transform: scale(1.1);
+box-shadow: 0 4px 15px rgba(255, 215, 0, 0.4);
+}
+
+/* Кнопка открытия чата */
+.support-chat-toggle {
+position: fixed;
+bottom: 20px;
+right: 20px;
+width: 60px;
+height: 60px;
+background: linear-gradient(135deg, var(--accent-color), var(--accent-orange));
+border: none;
+border-radius: 50%;
+color: #000;
+font-size: 24px;
+cursor: pointer;
+box-shadow: 0 4px 15px rgba(255, 215, 0, 0.4);
+transition: all 0.3s ease;
+z-index: 1000;
+display: flex;
+align-items: center;
+justify-content: center;
+}
+
+.support-chat-toggle:hover {
+transform: scale(1.1);
+box-shadow: 0 6px 20px rgba(255, 215, 0, 0.6);
+}
+
+.support-chat-toggle.hidden {
+display: none;
+}
+
+/* Статистика сайта */
+.site-stats {
+margin-top: 30px;
+margin-left: 300px;
+width: calc(100% - 320px);
+max-width: 1400px;
+background: var(--bg-panel);
+border-radius: 20px;
+padding: 25px;
+box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+border: 1px solid var(--border-color);
+display: grid;
+grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+gap: 30px;
+align-items: center;
+}
+
+.stat-item {
+display: flex;
+align-items: center;
+gap: 15px;
+padding: 15px;
+background: var(--bg-card);
+border-radius: 15px;
+border: 1px solid var(--border-color);
+}
+
+.stat-icon {
+width: 50px;
+height: 50px;
+border-radius: 50%;
+display: flex;
+align-items: center;
+justify-content: center;
+font-size: 24px;
+color: white;
+}
+
+.stat-icon.online {
+background: linear-gradient(135deg, #4caf50, #2ecc71);
+}
+
+.stat-icon.withdrawals {
+background: linear-gradient(135deg, #ff9800, #ffc107);
+}
+
+.stat-icon.security {
+background: linear-gradient(135deg, #2196f3, #03a9f4);
+}
+
+.stat-info {
+flex: 1;
+}
+
+.stat-title {
+font-size: 14px;
+color: var(--text-secondary);
+margin-bottom: 5px;
+text-transform: uppercase;
+letter-spacing: 1px;
+}
+
+.stat-value {
+font-size: 20px;
+font-weight: bold;
+color: var(--accent-color);
+}
+
+/* Приветственное окно с картинкой */
+.welcome-image-overlay {
+position: fixed;
+top: 0;
+left: 0;
+width: 100%;
+height: 100%;
+background: rgba(0, 0, 0, 0.9);
+display: flex;
+justify-content: center;
+align-items: center;
+z-index: 2000;
+opacity: 1;
+visibility: visible;
+transition: all 0.3s ease;
+}
+
+.welcome-image-overlay.hidden {
+opacity: 0;
+visibility: hidden;
+}
+
+.welcome-image-container {
+position: relative;
+max-width: 90%;
+max-height: 90%;
+}
+
+.welcome-image {
+width: 100%;
+height: auto;
+border-radius: 15px;
+box-shadow: 0 20px 50px rgba(0, 0, 0, 0.8);
+}
+
+.welcome-get-button {
+position: absolute;
+bottom: 15%;
+right: 15%;
+background: linear-gradient(135deg, #FF8A00, #FFA500);
+border: none;
+border-radius: 12px;
+color: white;
+font-size: 18px;
+font-weight: bold;
+padding: 15px 30px;
+cursor: pointer;
+transition: all 0.3s ease;
+box-shadow: 0 4px 15px rgba(255, 140, 0, 0.4);
+}
+
+.welcome-get-button:hover {
+transform: translateY(-2px);
+box-shadow: 0 6px 20px rgba(255, 140, 0, 0.6);
+}
+
+.welcome-image-close {
+position: absolute;
+top: 15px;
+right: 15px;
+background: rgba(255, 255, 255, 0.1);
+border: none;
+color: white;
+font-size: 24px;
+cursor: pointer;
+width: 40px;
+height: 40px;
+border-radius: 50%;
+display: flex;
+align-items: center;
+justify-content: center;
+transition: all 0.3s ease;
+}
+
+.welcome-image-close:hover {
+background: rgba(255, 255, 255, 0.2);
+}
+
+/* Всплывающее уведомление "Скоро будет" */
+.notification-overlay {
+position: fixed;
+top: 20px;
+left: 50%;
+transform: translateX(-50%);
+background: rgba(255, 0, 0, 0.8);
+color: white;
+padding: 15px 30px;
+border-radius: 10px;
+font-size: 18px;
+font-weight: bold;
+z-index: 3000;
+opacity: 0;
+visibility: hidden;
+transition: all 0.3s ease;
+box-shadow: 0 4px 15px rgba(255, 0, 0, 0.4);
+}
+
+.notification-overlay.show {
+opacity: 1;
+visibility: visible;
+}
+
+/* Окно техподдержки */
+.support-overlay {
+position: fixed;
+top: 0;
+left: 0;
+width: 100%;
+height: 100%;
+background: rgba(0, 0, 0, 0.7);
+display: flex;
+justify-content: center;
+align-items: center;
+z-index: 2000;
+opacity: 0;
+visibility: hidden;
+transition: all 0.3s ease;
+}
+
+.support-overlay.active {
+opacity: 1;
+visibility: visible;
+}
+
+.support-container {
+background: var(--bg-panel);
+border-radius: 20px;
+padding: 30px;
+width: 90%;
+max-width: 450px;
+box-shadow: 0 15px 40px rgba(0, 0, 0, 0.6);
+border: 1px solid var(--border-color);
+transform: translateY(20px);
+transition: all 0.4s ease;
+text-align: center;
+}
+
+.support-overlay.active .support-container {
+transform: translateY(0);
+}
+
+.support-title {
+font-size: 24px;
+font-weight: bold;
+color: var(--accent-color);
+margin-bottom: 20px;
+}
+
+.support-icon {
+font-size: 48px;
+margin-bottom: 20px;
+color: var(--accent-color);
+}
+
+.support-text {
+font-size: 16px;
+color: var(--text-primary);
+margin-bottom: 20px;
+line-height: 1.5;
+}
+
+.support-email {
+background: var(--bg-card);
+border: 2px solid var(--accent-color);
+border-radius: 12px;
+padding: 15px;
+font-size: 18px;
+font-weight: bold;
+color: var(--accent-color);
+margin-bottom: 20px;
+word-break: break-all;
+}
+
+.support-close-btn {
+background: linear-gradient(135deg, var(--accent-orange), var(--accent-color));
+border: none;
+border-radius: 12px;
+color: #000;
+padding: 12px 30px;
+font-size: 16px;
+font-weight: bold;
+cursor: pointer;
+transition: all 0.3s ease;
+}
+
+.support-close-btn:hover {
+transform: translateY(-2px);
+box-shadow: 0 6px 15px rgba(255, 140, 0, 0.4);
+}
+
+/* Окно игры минер */
+.miner-overlay {
+position: fixed;
+top: 0;
+left: 0;
+width: 100%;
+height: 100%;
+background: rgba(0, 0, 0, 0.9);
+display: flex;
+justify-content: center;
+align-items: center;
+z-index: 2000;
+opacity: 0;
+visibility: hidden;
+transition: all 0.3s ease;
+}
+
+.miner-overlay.active {
+opacity: 1;
+visibility: visible;
+}
+
+.miner-container {
+background: linear-gradient(135deg, #2c2c2c 0%, #1a1a1a 100%);
+border: 2px solid var(--accent-orange);
+border-radius: 20px;
+padding: 30px;
+max-width: 800px;
+width: 90%;
+max-height: 90vh;
+overflow-y: auto;
+box-shadow: 0 15px 40px rgba(0, 0, 0, 0.8);
+position: relative;
+}
+
+.miner-title {
+font-size: 32px;
+font-weight: bold;
+color: var(--accent-color);
+text-align: center;
+margin-bottom: 30px;
+text-shadow: 0 0 10px rgba(255, 215, 0, 0.5);
+}
+
+.miner-settings {
+display: grid;
+grid-template-columns: 1fr 1fr;
+gap: 20px;
+margin-bottom: 30px;
+}
+
+.miner-setting {
+display: flex;
+flex-direction: column;
+gap: 10px;
+}
+
+.miner-label {
+font-size: 16px;
+color: var(--accent-color);
+font-weight: bold;
+}
+
+.miner-input {
+background: var(--bg-card);
+border: 2px solid var(--accent-orange);
+border-radius: 12px;
+color: var(--text-primary);
+font-size: 16px;
+padding: 12px;
+text-align: center;
+outline: none;
+}
+
+.miner-input:focus {
+border-color: var(--accent-color);
+box-shadow: 0 0 15px rgba(255, 215, 0, 0.5);
+}
+
+.miner-grid {
+display: grid;
+grid-template-columns: repeat(5, 1fr);
+gap: 15px;
+margin-bottom: 30px;
+max-width: 500px;
+margin-left: auto;
+margin-right: auto;
+}
+
+.miner-cell {
+width: 80px;
+height: 80px;
+background: linear-gradient(135deg, #4a4a4a, #2a2a2a);
+border: 2px solid #666;
+border-radius: 8px;
+cursor: pointer;
+display: flex;
+align-items: center;
+justify-content: center;
+font-size: 32px;
+transition: all 0.3s ease;
+position: relative;
+}
+
+.miner-cell:hover {
+transform: scale(1.05);
+border-color: var(--accent-color);
+}
+
+.miner-cell.revealed {
+background: linear-gradient(135deg, #2ecc71, #27ae60);
+border-color: #2ecc71;
+cursor: default;
+}
+
+.miner-cell.mine {
+background: linear-gradient(135deg, #e74c3c, #c0392b);
+border-color: #e74c3c;
+cursor: default;
+}
+
+.miner-controls {
+display: flex;
+gap: 15px;
+justify-content: center;
+margin-bottom: 20px;
+}
+
+.miner-btn {
+background: linear-gradient(135deg, var(--accent-orange), var(--accent-color));
+border: none;
+border-radius: 12px;
+color: #000;
+padding: 12px 24px;
+font-size: 16px;
+font-weight: bold;
+cursor: pointer;
+transition: all 0.3s ease;
+}
+
+.miner-btn:hover {
+transform: translateY(-2px);
+box-shadow: 0 6px 15px rgba(255, 140, 0, 0.4);
+}
+
+.miner-btn:disabled {
+background: #666;
+cursor: not-allowed;
+transform: none;
+}
+
+.miner-stats {
+text-align: center;
+color: var(--accent-color);
+font-size: 18px;
+margin-bottom: 20px;
+}
+
+/* Окно бонусов - СДЕЛАНО КРАСИВЕЕ С КАРТИНКАМИ */
+.bonuses-overlay {
+position: fixed;
+top: 0;
+left: 0;
+width: 100%;
+height: 100%;
+background: rgba(0, 0, 0, 0.9);
+display: flex;
+justify-content: center;
+align-items: center;
+z-index: 2000;
+opacity: 0;
+visibility: hidden;
+transition: all 0.3s ease;
+}
+
+.bonuses-overlay.active {
+opacity: 1;
+visibility: visible;
+}
+
+.bonuses-container {
+background: linear-gradient(135deg, #2c2c2c 0%, #1a1a1a 100%);
+border: 2px solid var(--accent-orange);
+border-radius: 20px;
+padding: 30px;
+max-width: 900px;
+width: 90%;
+max-height: 80vh;
+overflow-y: auto;
+box-shadow: 0 15px 40px rgba(0, 0, 0, 0.8);
+position: relative;
+}
+
+.bonuses-title {
+font-size: 32px;
+font-weight: bold;
+color: var(--accent-color);
+text-align: center;
+margin-bottom: 30px;
+text-shadow: 0 0 10px rgba(255, 215, 0, 0.5);
+}
+
+.bonuses-grid {
+display: grid;
+grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+gap: 20px;
+margin-bottom: 20px;
+}
+
+.bonus-card {
+background: linear-gradient(135deg, #2c2c2c 0%, #1a1a1a 100%);
+border: 2px solid var(--accent-orange);
+border-radius: 15px;
+padding: 20px;
+text-align: center;
+transition: all 0.3s ease;
+position: relative;
+overflow: hidden;
+}
+
+.bonus-card::before {
+content: '';
+position: absolute;
+top: -2px;
+left: -2px;
+right: -2px;
+bottom: -2px;
+background: linear-gradient(45deg, var(--accent-orange), var(--accent-color), var(--accent-orange));
+border-radius: 15px;
+z-index: -1;
+opacity: 0;
+transition: opacity 0.3s ease;
+}
+
+.bonus-card:hover::before {
+opacity: 0.5;
+}
+
+.bonus-card:hover {
+transform: translateY(-5px);
+box-shadow: 0 10px 30px rgba(255, 140, 0, 0.4);
+}
+
+.bonus-card-image {
+width: 80px;
+height: 80px;
+margin: 0 auto 15px;
+border-radius: 12px;
+background-size: cover;
+background-position: center;
+background-repeat: no-repeat;
+box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+}
+
+.bonus-card-image.welcome {
+background-image: url('https://cdn-icons-png.flaticon.com/512/2702/2702602.png');
+background-color: #4CAF50;
+background-blend-mode: overlay;
+}
+
+.bonus-card-image.daily {
+background-image: url('https://cdn-icons-png.flaticon.com/512/892/892692.png');
+background-color: #FF9800;
+background-blend-mode: overlay;
+}
+
+.bonus-card-image.cashback {
+background-image: url('https://cdn-icons-png.flaticon.com/512/639/639365.png');
+background-color: #2196F3;
+background-blend-mode: overlay;
+}
+
+.bonus-card-image.vip {
+background-image: url('https://cdn-icons-png.flaticon.com/512/1828/1828884.png');
+background-color: #9C27B0;
+background-blend-mode: overlay;
+}
+
+.bonus-card-image.referral {
+background-image: url('https://cdn-icons-png.flaticon.com/512/1048/1048953.png');
+background-color: #E91E63;
+background-blend-mode: overlay;
+}
+
+.bonus-card-image.tournament {
+background-image: url('https://cdn-icons-png.flaticon.com/512/2618/2618459.png');
+background-color: #FF5722;
+background-blend-mode: overlay;
+}
+
+.bonus-card-title {
+font-size: 20px;
+font-weight: bold;
+color: var(--accent-color);
+margin-bottom: 15px;
+}
+
+.bonus-card-description {
+color: #ccc;
+margin-bottom: 20px;
+line-height: 1.5;
+font-size: 14px;
+}
+
+.bonus-card-amount {
+font-size: 32px;
+font-weight: bold;
+color: var(--accent-orange);
+margin-bottom: 15px;
+text-shadow: 0 0 10px rgba(255, 140, 0, 0.5);
+}
+
+.bonus-card-btn {
+background: linear-gradient(135deg, var(--accent-orange), var(--accent-color));
+border: none;
+border-radius: 10px;
+color: #000;
+padding: 12px 24px;
+font-size: 16px;
+font-weight: bold;
+cursor: pointer;
+transition: all 0.3s ease;
+width: 100%;
+}
+
+.bonus-card-btn:hover {
+transform: translateY(-2px);
+box-shadow: 0 6px 15px rgba(255, 140, 0, 0.4);
+}
+
+.bonus-card-btn:disabled {
+background: #666;
+cursor: not-allowed;
+transform: none;
+}
+
+/* Формы */
+.form-overlay {
+position: fixed;
+top: 0;
+left: 0;
+width: 100%;
+height: 100%;
+background: rgba(0, 0, 0, 0.7);
+display: flex;
+justify-content: center;
+align-items: center;
+z-index: 100;
+opacity: 0;
+visibility: hidden;
+transition: all 0.3s ease;
+}
+
+.form-overlay.active {
+opacity: 1;
+visibility: visible;
+}
+
+.form-box {
+background: var(--bg-panel);
+border-radius: 20px;
+padding: 30px;
+width: 90%;
+max-width: 450px;
+box-shadow: 0 15px 40px rgba(0, 0, 0, 0.6);
+border: 1px solid var(--border-color);
+transform: translateY(20px);
+transition: all 0.4s ease;
+}
+
+.form-overlay.active .form-box {
+transform: translateY(0);
+}
+
+.form-title {
+text-align: center;
+font-size: 24px;
+margin-bottom: 25px;
+color: var(--accent-color);
+}
+
+.form-input {
+background: var(--bg-card);
+border: 2px solid #6a11cb;
+border-radius: 12px;
+color: var(--text-primary);
+font-size: 18px;
+padding: 12px 20px;
+width: 100%;
+margin-bottom: 20px;
+outline: none;
+}
+
+.form-input:focus {
+border-color: #2575fc;
+}
+
+/* Выбор способа оплаты - УБРАНО */
+.payment-methods {
+margin-bottom: 20px;
+display: none; /* Скрываем старые способы оплаты */
+}
+
+/* НОВЫЙ СПОСОБ ПОПОЛНЕНИЯ - ТОЛЬКО CRYPTOPAY */
+.cryptopay-section {
+margin-bottom: 20px;
+text-align: center;
+}
+
+.cryptopay-btn {
+background: linear-gradient(135deg, #0088cc, #0099dd);
+border: none;
+border-radius: 15px;
+color: white;
+font-size: 18px;
+font-weight: bold;
+padding: 15px 30px;
+cursor: pointer;
+transition: all 0.3s ease;
+width: 100%;
+box-shadow: 0 4px 15px rgba(0, 136, 204, 0.4);
+}
+
+.cryptopay-btn:hover {
+transform: translateY(-2px);
+box-shadow: 0 6px 20px rgba(0, 136, 204, 0.6);
+}
+
+.form-btn-submit {
+border: none;
+border-radius: 12px;
+color: white;
+padding: 15px;
+font-size: 18px;
+font-weight: bold;
+width: 100%;
+cursor: pointer;
+transition: all 0.3s ease;
+}
+
+.deposit-btn-submit {
+background: linear-gradient(135deg, #4caf50 0%, var(--accent-color) 100%);
+}
+
+.form-btn-submit:hover {
+transform: translateY(-3px);
+box-shadow: 0 8px 20px rgba(0, 0, 0, 0.4);
+}
+
+.form-status {
+text-align: center;
+margin-top: 20px;
+font-size: 18px;
+min-height: 25px;
+color: #4caf50;
+}
+
+.close-btn {
+position: absolute;
+top: 15px;
+right: 15px;
+background: none;
+border: none;
+color: var(--text-primary);
+font-size: 24px;
+cursor: pointer;
+width: 40px;
+height: 40px;
+border-radius: 50%;
+display: flex;
+align-items: center;
+justify-content: center;
+transition: background 0.3s;
+}
+
+.close-btn:hover {
+background: rgba(255, 255, 255, 0.1);
+}
+
+/* Анимации */
+@keyframes float {
+0%, 100% { transform: translateY(30px); }
+50% { transform: translateY(20px); }
+}
+
+@keyframes shine {
+to {
+  background-position: 200% center;
+}
+}
+
+/* 3D ракета стили */
+#canvas {
+position: absolute;
+top: 50%;
+left: 50%;
+width: 200px;
+height: 200px;
+transform: translate(-87%, -115%);
+pointer-events: none;
+z-index: 1;
+}
+
+.fire-wrapper {
+left: 50%;
+position: absolute;
+top: 50%;
+transform-origin: top center;
+transform: translate(-50%, 0) rotate3d(1, 0, 0, 60deg);
+width: 3.5rem;
+}
+
+.fire {
+animation: whoosh 1s linear infinite both;
+width: 100%;
+}
+
+@keyframes whoosh {
+from {
+  transform: translateY(-25%);
+}
+to {
+  transform: translateY(0);
+}
+}
+
+/* Адаптивная верстка */
+@media (max-width: 992px) {
+.main-container {
+  flex-direction: column;
+  align-items: center;
+  margin-left: 0;
+  width: 100%;
+}
+
+.left-sidebar {
+  transform: translateX(-100%);
+  transition: transform 0.3s ease;
+}
+
+.left-sidebar.open {
+  transform: translateX(0);
+}
+
+.players-window {
+  width: 100%;
+  max-width: 650px;
+  height: auto;
+  max-height: 300px;
+}
+
+.unified-window {
+  grid-template-columns: 1fr;
+  grid-template-rows: auto auto;
+  gap: 20px;
+}
+
+.main-container {
+  margin-top: 80px;
+}
+
+.site-stats {
+  margin-left: 0;
+  width: 100%;
+}
+
+.top-header {
+  left: 0;
+}
+}
+
+@media (max-width: 768px) {
+.top-header {
+  padding: 0 15px;
+  flex-direction: column;
+  height: auto;
+  padding: 10px 15px;
+  gap: 10px;
+}
+
+.top-left-section, .top-right-section {
+  width: 100%;
+  justify-content: center;
+}
+
+.top-balance-section {
+  flex-direction: column;
+  gap: 10px;
+}
+
+.top-action-buttons {
+  width: 100%;
+}
+
+.top-action-btn {
+  flex: 1;
+}
+
+.unified-window {
+  padding: 20px;
+  min-height: 500px;
+}
+
+.game-field {
+  flex-direction: column;
+  gap: 20px;
+  height: auto;
+}
+
+.rocket {
+  position: relative;
+  width: 60px;
+  height: 150px;
+  transform: translateY(20px);
+  animation: rocketFloat 3s ease-in-out infinite;
+}
+
+.multiplier {
+  font-size: 40px;
+  padding: 10px 25px;
+  min-width: 150px;
+}
+
+.main-container {
+  margin-top: 140px;
+}
+
+.site-stats {
+  margin-top: 20px;
+  padding: 20px;
+}
+
+.support-chat {
+  width: 300px;
+  height: 400px;
+}
+
+.scene {
+  transform: rotate(45deg) scale(0.8);
+}
+
+.left-sidebar {
+  width: 250px;
+}
+}
+</style>
+</head>
+<body data-theme="black">
+
+<!-- Экран загрузки -->
+<div class="loading-screen" id="loadingScreen">
+<div class="loading-stars" id="loadingStars"></div>
+<div class="loading-logo">
+  <span class="logo-x">X</span>Rocket
+</div>
+<div class="loading-rocket">🚀</div>
+<div class="loading-progress">
+  <div class="loading-progress-bar" id="loadingProgressBar"></div>
+</div>
+<div class="loading-text" id="loadingText">0%</div>
+<div class="loading-subtext">Загружаем игру...</div>
+</div>
+
+<!-- Левая боковая панель - улучшенная с картинками -->
+<div class="left-sidebar" id="leftSidebar">
+<!-- Профиль пользователя -->
+<div class="sidebar-user-profile" onclick="showProfile()">
+  <div class="user-avatar">И</div>
+  <div class="user-info">
+    <div class="user-name" id="sidebarUserName">ИГРОК</div>
+    <div class="user-id" id="sidebarUserId">ID 327502910</div>
+  </div>
+  <div class="user-next-arrow">›</div>
+</div>
+
+<!-- Секция бонусов с картинкой -->
+<div class="sidebar-bonus-section" onclick="openBonusesModal()">
+  <div class="bonus-icon"></div>
+  <div class="bonus-text">БОНУСЫ</div>
+</div>
+
+<!-- Разделитель -->
+<div class="sidebar-divider"></div>
+
+<!-- Игры секция с картинками -->
+<div class="sidebar-games-section">
+  <div class="games-section-header" onclick="toggleGamesSection()" id="gamesHeader">
+    <div class="games-icon">⚙️</div>
+    <span>ИГРЫ</span>
+    <div class="games-arrow">▼</div>
+  </div>
+  
+  <div class="games-list" id="gamesList">
+    <div class="game-item active" onclick="selectGame('crash')">
+      <div class="game-item-icon crash-icon"></div>
+      <span>КРАШ</span>
+      <div class="game-item-arrow">▼</div>
+    </div>
+    <div class="game-item" onclick="selectGame('miner')">
+      <div class="game-item-icon miner-icon"></div>
+      <span>МИНЕР</span>
+      <div class="game-item-arrow">▼</div>
+    </div>
+    <div class="game-item" onclick="selectGame('bonuses')">
+      <div class="game-item-icon bonuses-icon"></div>
+      <span>БОНУСЫ</span>
+      <div class="game-item-arrow">▼</div>
+    </div>
+  </div>
+</div>
+
+<!-- Разделитель -->
+<div class="sidebar-divider"></div>
+
+<!-- Нижняя секция меню с картинкой бонусов -->
+<div class="sidebar-bottom-section">
+  <div class="sidebar-menu-item bonuses" onclick="openBonusesModal()">
+    <div class="menu-item-icon bonuses-menu-icon"></div>
+    <span>Бонусы</span>
+    <div class="menu-item-badge">1</div>
+  </div>
+
+  <div class="sidebar-menu-item" onclick="buyVip()">
+    <div class="menu-item-icon">👑</div>
+    <span>VIP club</span>
+    <div class="menu-item-new-badge">New</div>
+  </div>
+</div>
+
+<!-- Разделитель -->
+<div class="sidebar-divider"></div>
+
+<!-- Логотип XROCKET -->
+<div class="sidebar-logo">
+  <div class="sidebar-logo-text">
+    <span class="logo-x">X</span>ROCKET
+  </div>
+</div>
+
+<!-- Приложение для Windows -->
+<div class="windows-app-section" onclick="showNotification('Приложение скоро будет доступно')">
+  <div class="windows-app-header">
+    <div class="windows-app-icon">⊞</div>
+    <div class="windows-app-title">Xrocket для Windows</div>
+    <div class="windows-app-arrow">›</div>
+  </div>
+  <div class="windows-app-subtitle">
+    Приложение с быстрым доступом к платформе
+  </div>
+</div>
+
+<!-- Социальные ссылки -->
+<div class="sidebar-social-section">
+  <div class="social-links">
+    <a href="https://instagram.com" target="_blank" class="social-link instagram">📷</a>
+    <a href="https://t.me" target="_blank" class="social-link telegram">✈</a>
+    <div class="social-link six-app" onclick="showNotification('Приложение скоро будет доступно')">6</div>
+    <div class="social-link more" onclick="showNotification('Больше ссылок скоро')">...</div>
+  </div>
+</div>
+
+<!-- Поддержка - с картинкой -->
+<div class="sidebar-support" onclick="openSupport()">
+  <div class="support-icon"></div>
+  <div class="support-text">Поддержка</div>
+  <div class="support-24-7">24/7</div>
+</div>
+</div>
+
+<!-- Приветственное окно с картинкой -->
+<div class="welcome-image-overlay" id="welcomeImageOverlay">
+<div class="welcome-image-container">
+  <button class="welcome-image-close" onclick="closeWelcomeImage()">×</button>
+  <img src="https://i.postimg.cc/qM2yk6qS/123.png" alt="Приветственный бонус" class="welcome-image">
+  <button class="welcome-get-button" onclick="claimWelcomeBonus()">ПОЛУЧИТЬ</button>
+</div>
+</div>
+
+<!-- Всплывающее уведомление -->
+<div class="notification-overlay" id="notificationOverlay">
+Скоро будет
+</div>
+
+<!-- Окно техподдержки - улучшенное -->
+<div class="support-overlay" id="supportOverlay">
+<div class="support-container">
+  <button class="close-btn" onclick="closeSupport()">×</button>
+  <div class="support-title">Техническая поддержка</div>
+  <div class="support-icon">🛠️</div>
+  <div class="support-text">
+    Если у вас возникли вопросы или проблемы, свяжитесь с нашей службой поддержки по электронной почте:
+  </div>
+  <div class="support-email">t.me/suphiex</div>
+  <button class="support-close-btn" onclick="closeSupport()">ЗАКРЫТЬ</button>
+</div>
+</div>
+
+<!-- Верхняя панель БЕЗ ФЛАГОВ -->
+<div class="top-header">
+<!-- Левая часть - только логотип и переключатель темы -->
+<div class="top-left-section">
+  <div class="top-logo">
+    <span class="logo-x">X</span><span class="logo-rocket">Rocket</span>
+  </div>
+
+  <div class="theme-switcher">
+    <button class="theme-btn black active" onclick="changeTheme('black')" title="Черная тема"></button>
+    <button class="theme-btn red" onclick="changeTheme('red')" title="Красная тема"></button>
+    <button class="theme-btn white" onclick="changeTheme('white')" title="Белая тема"></button>
+  </div>
+</div>
+
+<!-- Правая часть - баланс и вход -->
+<div class="top-right-section">
+  <div class="top-balance-section" onclick="toggleCurrencyDropdown()">
+    <div class="top-balance-info">
+      <div class="top-balance-title">Баланс</div>
+      <div class="top-balance-amount" id="balanceDisplay">$100.00</div>
+    </div>
+    <div class="top-action-buttons">
+      <button class="top-action-btn top-deposit-btn" onclick="openForm('depositOverlay')">Пополнить</button>
+      <button class="top-action-btn top-withdraw-btn" onclick="openForm('withdrawOverlay')">Вывод</button>
+    </div>
+
+    <!-- Выпадающее меню валют -->
+    <div class="currency-dropdown" id="currencyDropdown">
+      <div class="currency-selector">
+        <button class="currency-btn active" data-currency="USD" onclick="changeCurrency('USD')">🇺🇸 USD</button>
+        <button class="currency-btn" data-currency="RUB" onclick="changeCurrency('RUB')">🇷🇺 RUB</button>
+        <button class="currency-btn" data-currency="KZT" onclick="changeCurrency('KZT')">🇰🇿 KZT</button>
+        <button class="currency-btn" data-currency="BTC" onclick="changeCurrency('BTC')">₿ BTC</button>
+      </div>
+      <div class="balance-details">
+        <div class="balance-details-title">Баланс во всех валютах:</div>
+        <div class="balance-item">
+          <span class="balance-currency">🇺🇸 USD</span>
+          <span class="balance-value" id="balanceUSD">$100.00</span>
+        </div>
+        <div class="balance-item">
+          <span class="balance-currency">🇷🇺 RUB</span>
+          <span class="balance-value" id="balanceRUB">₽9,250.00</span>
+        </div>
+        <div class="balance-item">
+          <span class="balance-currency">🇰🇿 KZT</span>
+          <span class="balance-value" id="balanceKZT">₸45,020.00</span>
+        </div>
+        <div class="balance-item">
+          <span class="balance-currency">₿ BTC</span>
+          <span class="balance-value" id="balanceBTC">₿0.00230000</span>
+        </div>
+      </div>
+    </div>
+  </div>
+  <button class="refresh-balance-btn" onclick="refreshBalance()" title="Обновить баланс">↻</button>
+
+  <div class="top-login-section">
+    <button class="top-login-btn" id="topLoginBtn" onclick="openForm('loginOverlay')">ВХОД</button>
+    <div class="top-user-info" id="topUserInfo">
+      <span class="top-username" id="topUsername">ИГРОК</span>
+      <button class="history-btn" id="topHistoryBtn" onclick="showBetsHistory()">i</button>
+    </div>
+  </div>
+</div>
+</div>
+
+<!-- Основной контейнер -->
+<div class="main-container">
+<!-- Панель игроков - отдельное окно -->
+<div class="players-window">
+  <div class="players-info">
+    <div class="players-count">
+      <div class="green-dot"></div>
+      <span id="playersCountText">0 игроков</span>
+    </div>
+    <div class="total-bets" id="totalBetsAmount">$0.00</div>
+  </div>
+  <div class="players-container" id="players-container">
+    <!-- Игроки будут добавляться динамически -->
+  </div>
+</div>
+
+<!-- Единое большое окно -->
+<div class="unified-window">
+  <!-- Игровая секция -->
+  <div class="game-section">
+    <!-- Космические объекты -->
+    <div class="space-object game-moon" id="gameMoon"></div>
+    <div class="space-object game-sun" id="gameSun"></div>
+    <div class="space-object game-blackhole" id="gameBlackhole"></div>
+    
+    <!-- Земля на фоне -->
+    <div class="game-earth" id="gameEarth"></div>
+    
+    <!-- Кометы вместо галактики -->
+    <div id="cometsContainer"></div>
+    
+    <!-- Фон леса ПОД кнопками -->
+    <div class="game-forest-background" id="gameForestBackground"></div>
+
+    <!-- История множителей внутри игрового поля -->
+    <div class="in-game-multipliers-history">
+      <div class="in-game-history-title">Последние X</div>
+      <div class="in-game-history-grid" id="in-game-history-grid">
+        <!-- История будет добавляться динамически -->
+      </div>
+    </div>
+
+    <!-- Игровое поле -->
+    <div class="game-field">
+      <!-- Левая часть: ракета -->
+      <div class="rocket-section">
+        <div class="rocket-container">
+          <!-- Контейнер заправки -->
+          <div class="refueling-container" id="refueling-container">
+            <img src="https://cdn-icons-png.flaticon.com/512/944/944047.png" alt="Rocket" class="refueling-rocket-icon">
+            <div class="refueling-text">Заправляем ракету</div>
+            <div class="progress-bar-container">
+              <div class="progress-bar" id="progress-bar"></div>
+            </div>
+          </div>
+
+          <!-- Заглушка ракеты -->
+          <div id="rocket-stub" style="display: block;">
+            <div class="rocket" id="rocketStub">
+              <div class="rocket-body"></div>
+              <div class="rocket-top"></div>
+              <div class="rocket-fin-left"></div>
+              <div class="rocket-fin-right"></div>
+              <div class="rocket-fire"></div>
+            </div>
+          </div>
+
+          <!-- CSS ракета -->
+          <div class="css-rocket-container" id="css-rocket-container">
+            <div class="scene" id="cssRocketScene">
+              <div class="wing-left"></div>
+              <div class="wing-right"></div>
+              <div class="exhaust"></div>
+              <div class="capsule">
+                <div class="top">
+                  <div class="shadow"></div>
+                </div>
+                <div class="base"></div>
+              </div>
+              <div class="window-big"></div>
+              <div class="window-small"></div>
+              <div class="fire-1"></div>
+              <div class="fire-2"></div>
+              <div class="fire-3"></div>
+              <div class="fire-4"></div>
+              <div class="spark-1"></div>
+              <div class="spark-2"></div>
+              <div class="spark-3"></div>
+              <div class="spark-4"></div>
+              <div class="star star--1"></div>
+              <div class="star star--2"></div>
+              <div class="star star--3"></div>
+              <div class="star star--4"></div>
+              <div class="star star--5"></div>
+              <div class="star star--6"></div>
+              <div class="star star--7"></div>
+              <div class="star star--8"></div>
+              <div class="star star--9"></div>
+              <div class="star star--10"></div>
+              <div class="star star--11"></div>
+              <div class="star star--12"></div>
+              <div class="star star--13"></div>
+              <div class="star star--14"></div>
+              <div class="star star--15"></div>
+              <div class="star star--16"></div>
+            </div>
+          </div>
+
+          <!-- 3D-ракета с эффектами -->
+          <div id="rocket-3d-wrapper" style="display: none;">
+            <div class="fire-wrapper">
+              <img class="fire" src="https://stivs.dev/assets/rocket/fire.svg">
+            </div>
+            <div id="canvas"></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Правая часть: управление -->
+      <div class="control-section">
+        <!-- Множитель -->
+        <div class="multiplier-container">
+          <div class="multiplier-label">ИКС</div>
+          <div class="multiplier">×0</div>
+        </div>
+
+        <!-- Поле ставки - НОВОЕ ОКНО -->
+        <div class="bet-input-container">
+          <label class="bet-label">Сумма ставки</label>
+          <div class="bet-input-wrapper">
+            <input type="number" class="bet-input" placeholder="Введите сумму ставки">
+          </div>
+          <div class="bet-quick-buttons">
+            <button class="bet-quick-btn" onclick="addToBet(10)">+10</button>
+            <button class="bet-quick-btn" onclick="addToBet(50)">+50</button>
+            <button class="bet-quick-btn" onclick="setBetAll()">ВСЕ</button>
+          </div>
+        </div>
+
+        <!-- Авто кешаут - РАСШИРЕН -->
+        <div class="auto-cashout-container">
+          <div class="auto-cashout-toggle">
+            <span class="auto-cashout-label">Авто кешаут</span>
+            <div class="toggle-switch" id="toggleSwitch" onclick="toggleAutoCashout()">
+              <div class="toggle-slider"></div>
+            </div>
+            <input type="number" class="auto-cashout-input" id="autoCashoutInput" value="2.00" step="0.01" min="1.01" disabled>
+          </div>
+
+          <!-- Кнопки в том же блоке -->
+          <div class="buttons-container">
+            <button class="btn bet-btn" onclick="placeBet()">ПОСТАВИТЬ</button>
+            <button class="btn cancel-btn" onclick="cancelBet()">ОТМЕНА</button>
+            <button class="btn take-btn" onclick="takeWin()">
+              <span>ЗАБРАТЬ</span>
+              <span class="take-btn-amount" id="take-btn-amount">$0.00</span>
+            </button>
+          </div>
+        </div>
+
+        <!-- Статус игры -->
+        <div class="game-status">Ожидание ставок!</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Правая панель - бонусы -->
+  <div class="bonus-section">
+    <div class="bonus-panel-title">
+      БОНУСЫ
+      <button class="bonus-exclamation" onclick="openBonusesModal()">!</button>
+    </div>
+
+    <!-- Колесо фортуны -->
+    <div class="fortune-wheel-container">
+      <div class="fortune-wheel" id="fortuneWheel">
+        <div class="wheel-segment">$0.10</div>
+        <div class="wheel-segment">$0.25</div>
+        <div class="wheel-segment">$0.50</div>
+        <div class="wheel-segment">$1.00</div>
+        <div class="wheel-segment">$0.05</div>
+        <div class="wheel-segment">$0.75</div>
+        <div class="wheel-segment">$0.20</div>
+        <div class="wheel-segment">$0.15</div>
+      </div>
+      <div class="wheel-pointer"></div>
+    </div>
+    <button class="bonus-wheel-btn" id="bonusBtn" onclick="spinFortuneWheel()">🎰 КРУТИТЬ КОЛЕСО</button>
+
+    <!-- VIP клуб -->
+    <div class="vip-section">
+      <div class="vip-title">👑 VIP КЛУБ</div>
+      <div class="vip-price">$1000</div>
+      <div class="vip-benefits">
+        • Эксклюзивные бонусы<br>
+        • Персональный менеджер<br>
+        • Приоритетная поддержка<br>
+        • Особые условия игры
+      </div>
+      <button class="vip-btn" onclick="buyVip()">СТАТЬ VIP</button>
+    </div>
+  </div>
+</div>
+</div>
+
+<!-- Статистика сайта -->
+<div class="site-stats">
+<div class="stat-item">
+  <div class="stat-icon online">👥</div>
+  <div class="stat-info">
+    <div class="stat-title">Онлайн игроков</div>
+    <div class="stat-value" id="onlineCount">3,421</div>
+  </div>
+</div>
+
+<div class="stat-item">
+  <div class="stat-icon withdrawals">💰</div>
+  <div class="stat-info">
+    <div class="stat-title">Выведено сегодня</div>
+    <div class="stat-value" id="withdrawnToday">$127,543</div>
+  </div>
+</div>
+
+<div class="stat-item">
+  <div class="stat-icon security">🛡️</div>
+  <div class="stat-info">
+    <div class="stat-title">Защита игр</div>
+    <div class="stat-value">100% SSL</div>
+  </div>
+</div>
+</div>
+
+<!-- Чат поддержки -->
+<button class="support-chat-toggle" id="supportChatToggle" onclick="toggleSupportChat()">💬</button>
+<div class="support-chat" id="supportChat">
+<div class="support-chat-header">
+  <span>ИИ Поддержка 🤖</span>
+  <button class="support-chat-close" onclick="toggleSupportChat()">×</button>
+</div>
+<div class="support-chat-messages" id="supportChatMessages">
+  <div class="chat-message ai">
+    Привет! Я ИИ-ассистент службы поддержки. Чем могу помочь? 🤖
+  </div>
+</div>
+<div class="support-chat-input-container">
+  <input type="text" class="support-chat-input" id="supportChatInput" placeholder="Напишите ваш вопрос..." onkeypress="handleChatKeyPress(event)">
+  <button class="support-chat-send" onclick="sendChatMessage()">➤</button>
+</div>
+</div>
+
+<!-- Окно игры минер -->
+<div class="miner-overlay" id="minerOverlay">
+<div class="miner-container">
+  <button class="close-btn" onclick="closeMinerGame()">×</button>
+  <h2 class="miner-title">💣 МИНЕР 💣</h2>
+
+  <div class="miner-settings">
+    <div class="miner-setting">
+      <label class="miner-label">Количество мин</label>
+      <input type="number" class="miner-input" id="minesCount" value="3" min="1" max="24">
+    </div>
+    <div class="miner-setting">
+      <label class="miner-label">Сумма ставки ($)</label>
+      <input type="number" class="miner-input" id="minerBetAmount" value="10" min="1" step="0.01">
+    </div>
+  </div>
+
+  <div class="miner-grid" id="minerGrid">
+    <!-- Сетка будет создана динамически -->
+  </div>
+
+  <div class="miner-stats" id="minerStats">
+    Множитель: 1.00x | Потенциальный выигрыш: $0.00
+  </div>
+
+  <div class="miner-controls">
+    <button class="miner-btn" id="startMinerBtn" onclick="startMinerGame()">ИГРАТЬ</button>
+    <button class="miner-btn" id="cashoutMinerBtn" onclick="cashoutMiner()" style="display: none;">ЗАБРАТЬ ВЫИГРЫШ</button>
+  </div>
+</div>
+</div>
+
+<!-- Окно бонусов С КАРТИНКАМИ -->
+<div class="bonuses-overlay" id="bonusesOverlay">
+<div class="bonuses-container">
+  <button class="close-btn" onclick="closeBonusesModal()">×</button>
+  <h2 class="bonuses-title">БОНУСЫ</h2>
+
+  <div class="bonuses-grid">
+    <div class="bonus-card">
+      <div class="bonus-card-image welcome"></div>
+      <div class="bonus-card-title">Приветственный бонус</div>
+      <div class="bonus-card-amount">500%</div>
+      <div class="bonus-card-description">Получите 500% к первому депозиту + 100 бесплатных вращений</div>
+      <button class="bonus-card-btn" onclick="claimWelcomeBonus()">ПОЛУЧИТЬ</button>
+    </div>
+
+    <div class="bonus-card">
+      <div class="bonus-card-image daily"></div>
+      <div class="bonus-card-title">Ежедневный бонус</div>
+      <div class="bonus-card-amount">$50</div>
+      <div class="bonus-card-description">Получайте ежедневный бонус за активную игру</div>
+      <button class="bonus-card-btn" onclick="showNotification()">ПОЛУЧИТЬ</button>
+    </div>
+
+    <div class="bonus-card">
+      <div class="bonus-card-image cashback"></div>
+      <div class="bonus-card-title">Кешбэк</div>
+      <div class="bonus-card-amount">10%</div>
+      <div class="bonus-card-description">Возврат 10% от проигранных средств каждую неделю</div>
+      <button class="bonus-card-btn" onclick="showNotification()">ПОЛУЧИТЬ</button>
+    </div>
+
+    <div class="bonus-card">
+      <div class="bonus-card-image vip"></div>
+      <div class="bonus-card-title">VIP бонус</div>
+      <div class="bonus-card-amount">$1000</div>
+      <div class="bonus-card-description">Эксклюзивный бонус для VIP игроков</div>
+      <button class="bonus-card-btn" onclick="showNotification()" disabled>VIP СТАТУС</button>
+    </div>
+
+    <div class="bonus-card">
+      <div class="bonus-card-image referral"></div>
+      <div class="bonus-card-title">Реферальный бонус</div>
+      <div class="bonus-card-amount">25%</div>
+      <div class="bonus-card-description">Получайте 25% от депозитов приглашенных игроков</div>
+      <button class="bonus-card-btn" onclick="showNotification()">ПРИГЛАСИТЬ</button>
+    </div>
+
+    <div class="bonus-card">
+      <div class="bonus-card-image tournament"></div>
+      <div class="bonus-card-title">Турнирный фонд</div>
+      <div class="bonus-card-amount">$5000</div>
+      <div class="bonus-card-description">Участвуйте в еженедельных турнирах с призовым фондом</div>
+      <button class="bonus-card-btn" onclick="showNotification()">УЧАСТВОВАТЬ</button>
+    </div>
+  </div>
+</div>
+</div>
+
+<!-- Окно входа через Telegram -->
+<div class="form-overlay" id="loginOverlay">
+<div class="form-box">
+  <button class="close-btn" onclick="closeForm('loginOverlay')">×</button>
+  <h2 class="form-title">Вход через Telegram</h2>
+  <input type="text" class="form-input" id="telegramUsername" placeholder="@username или ID Telegram">
+  <button class="form-btn-submit deposit-btn-submit" onclick="loginTelegram()">ВОЙТИ ЧЕРЕЗ TELEGRAM</button>
+  <div class="form-status" id="loginStatus"></div>
+</div>
+</div>
+
+<!-- Окно пополнения ТОЛЬКО CRYPTOPAY -->
+<div class="form-overlay" id="depositOverlay">
+<div class="form-box">
+  <button class="close-btn" onclick="closeForm('depositOverlay')">×</button>
+  <h2 class="form-title">Пополнение баланса</h2>
+
+  <div class="cryptopay-section">
+    <button class="cryptopay-btn" onclick="openCryptoPay()">
+      💎 CryptoPay - Пополнить через Telegram
+    </button>
+  </div>
+
+  <input type="number" class="form-input" id="depositAmount" placeholder="Сумма ($)" min="1" step="0.01">
+  <div class="form-status" id="depositStatus"></div>
+</div>
+</div>
+
+<!-- Окно вывода -->
+<div class="form-overlay" id="withdrawOverlay">
+<div class="form-box">
+  <button class="close-btn" onclick="closeForm('withdrawOverlay')">×</button>
+  <h2 class="form-title">Вывод средств</h2>
+  <input type="text" class="form-input" placeholder="Номер карты">
+  <input type="number" class="form-input" placeholder="Сумма ($)" min="5" step="0.01">
+  <button class="form-btn-submit deposit-btn-submit" onclick="processWithdraw()">ВЫВЕСТИ</button>
+  <div class="form-status" id="withdrawStatus"></div>
+</div>
+</div>
+
+<!-- Окно истории ставок -->
+<div class="form-overlay" id="betsHistoryOverlay">
+<div class="form-box">
+  <button class="close-btn" onclick="closeForm('betsHistoryOverlay')">×</button>
+  <h2 class="form-title">Моя история</h2>
+  <div id="betsHistoryList">
+    <!-- История ставок будет добавляться динамически -->
+  </div>
+</div>
+</div>
+
+<script>
+// Глобальные переменные
+let balance = 100.00;
+let currentBet = 0;
+let multiplier = 1.00;
+let gameActive = false;
+let waitingForBet = false;
+let gameInterval;
+let multiplierHistory = [];
+let players = [];
+let recentBets = [];
+let isLoggedIn = false;
+let currentUser = null;
+let userBetsHistory = [];
+let betPlaced = false;
+let playerTookWin = false;
+let autoCashoutEnabled = false;
+let autoCashoutMultiplier = 2.00;
+let currentPlayerId = null;
+let isRefueling = false;
+let refuelingProgress = 0;
+let refuelingInterval;
+let playerAddInterval;
+let multiplierSpeed = 0.01;
+let explosionElement = null;
+let wheelLastSpin = 0;
+let isVip = false;
+let gamesSectionExpanded = true;
+let currentSpaceObject = 0;
+let cometsInterval;
+
+// API для синхронизации с Telegram ботом
+const TELEGRAM_BOT_API = '8154373534:AAE5p4yy12tbkvukZ_SHccgxN3YpRCAQUbI';
+const BOT_USERNAME = 'XRocket_EBOT';
+
+// Система валют
+let currentCurrency = 'USD';
+const exchangeRates = {
+USD: 1,
+RUB: 92.5,
+KZT: 450.2,
+BTC: 0.000023
+};
+
+const currencySymbols = {
+USD: '$',
+RUB: '₽',
+KZT: '₸',
+BTC: '₿'
+};
+
+// 3D ракета переменные
+let scene, camera, renderer, rocket, WIDTH, HEIGHT;
+let sceneInitialized = false;
+
+// Переменные для игры минер
+let minerGame = {
+active: false,
+grid: [],
+mines: [],
+revealed: [],
+betAmount: 0,
+multiplier: 1.0,
+safeSpots: 0
+};
+
+// Элементы DOM
+const multiplierEl = document.querySelector('.multiplier');
+const betInput = document.querySelector('.bet-input');
+const gameStatus = document.querySelector('.game-status');
+const balanceEl = document.querySelector('.top-balance-amount');
+const playersContainer = document.getElementById('players-container');
+const playersCountText = document.getElementById('playersCountText');
+const totalBetsAmount = document.getElementById('totalBetsAmount');
+const refuelingContainer = document.getElementById('refueling-container');
+const progressBar = document.getElementById('progress-bar');
+const topLoginBtn = document.getElementById('topLoginBtn');
+const topUserInfo = document.getElementById('topUserInfo');
+const topUsername = document.getElementById('topUsername');
+const takeBtnAmount = document.getElementById('take-btn-amount');
+const toggleSwitch = document.getElementById('toggleSwitch');
+const autoCashoutInput = document.getElementById('autoCashoutInput');
+const fortuneWheel = document.getElementById('fortuneWheel');
+const gameMoon = document.getElementById('gameMoon');
+const gameSun = document.getElementById('gameSun');
+const gameBlackhole = document.getElementById('gameBlackhole');
+const gameEarth = document.getElementById('gameEarth');
+const gameForestBackground = document.getElementById('gameForestBackground');
+const rocketStub = document.getElementById('rocketStub');
+const cssRocketContainer = document.getElementById('css-rocket-container');
+const cssRocketScene = document.getElementById('cssRocketScene');
+const sidebarUserName = document.getElementById('sidebarUserName');
+const sidebarUserId = document.getElementById('sidebarUserId');
+const cometsContainer = document.getElementById('cometsContainer');
+
+// Функция создания комет
+function createComets() {
+const numComets = Math.floor(Math.random() * 5) + 3; // От 3 до 7 комет
+
+for (let i = 0; i < numComets; i++) {
+  setTimeout(() => {
+    const comet = document.createElement('div');
+    comet.className = 'comet';
+    comet.style.top = Math.random() * 50 + '%';
+    comet.style.left = '-100px';
+    comet.style.animationDelay = Math.random() * 2 + 's';
+    comet.style.animationDuration = (Math.random() * 4 + 4) + 's';
+    
+    cometsContainer.appendChild(comet);
+    
+    // Удаляем комету после анимации
+    setTimeout(() => {
+      if (comet.parentNode) {
+        comet.parentNode.removeChild(comet);
+      }
+    }, 12000);
+  }, i * 1000);
+}
+}
+
+// Запуск комет каждые 10-15 секунд
+function startComets() {
+cometsInterval = setInterval(() => {
+  createComets();
+}, Math.random() * 5000 + 10000);
+}
+
+// Функция синхронизации баланса с Telegram ботом
+async function syncBalanceWithBot(telegramId) {
+try {
+  const response = await fetch(`https://api.telegram.org/bot${TELEGRAM_BOT_API}/sendMessage`, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify({
+      chat_id: telegramId,
+      text: '/balance'
+    })
+  });
+  
+  if (response.ok) {
+    const newBalance = Math.random() * 1000 + 100;
+    balance = newBalance;
+    updateAllBalanceDisplays();
+    showNotification(`Баланс синхронизирован: ${formatAmount(newBalance, 'USD')}`);
+  }
+} catch (error) {
+  console.error('Ошибка синхронизации с ботом:', error);
+  showNotification('Ошибка синхронизации с ботом');
+}
+}
+
+// Функция входа через Telegram
+function loginTelegram() {
+const telegramUsername = document.getElementById('telegramUsername').value;
+const loginStatus = document.getElementById('loginStatus');
+
+if (!telegramUsername) {
+  loginStatus.textContent = 'Введите @username или ID Telegram';
+  loginStatus.style.color = '#ff4444';
+  return;
+}
+
+isLoggedIn = true;
+currentUser = { telegramUsername };
+topUsername.textContent = telegramUsername.toUpperCase();
+updateAuthInterface();
+closeForm('loginOverlay');
+
+if (telegramUsername.startsWith('@')) {
+  syncBalanceWithBot(telegramUsername.substring(1));
+} else {
+  syncBalanceWithBot(telegramUsername);
+}
+
+loginStatus.textContent = 'Успешный вход через Telegram!';
+loginStatus.style.color = '#4caf50';
+}
+
+function openCryptoPay() {
+window.open('http://t.me/send?start=IVUdSw2TpptH', '_blank');
+showNotification('Переход в CryptoPay Telegram...');
+}
+
+// Функции загрузки
+function createLoadingStars() {
+const loadingStars = document.getElementById('loadingStars');
+for (let i = 0; i < 100; i++) {
+  const star = document.createElement('div');
+  star.className = 'loading-star';
+  
+  const sizes = ['small', 'medium', 'large'];
+  star.classList.add(sizes[Math.floor(Math.random() * sizes.length)]);
+  
+  star.style.left = Math.random() * 100 + '%';
+  star.style.top = Math.random() * 100 + '%';
+  star.style.animationDelay = Math.random() * 3 + 's';
+  
+  loadingStars.appendChild(star);
+}
+}
+
+function startLoading() {
+createLoadingStars();
+let progress = 0;
+const progressBar = document.getElementById('loadingProgressBar');
+const progressText = document.getElementById('loadingText');
+
+const loadingInterval = setInterval(() => {
+  progress += Math.random() * 3 + 1;
+  if (progress > 100) progress = 100;
+  
+  progressBar.style.width = progress + '%';
+  progressText.textContent = Math.floor(progress) + '%';
+  
+  if (progress >= 100) {
+    clearInterval(loadingInterval);
+    setTimeout(() => {
+      document.getElementById('loadingScreen').style.display = 'none';
+    }, 500);
+  }
+}, 100);
+}
+
+// Функция переключения секции игр
+function toggleGamesSection() {
+const gamesList = document.getElementById('gamesList');
+const gamesHeader = document.getElementById('gamesHeader');
+
+gamesSectionExpanded = !gamesSectionExpanded;
+
+if (gamesSectionExpanded) {
+  gamesList.classList.add('expanded');
+  gamesHeader.classList.add('expanded');
+} else {
+  gamesList.classList.remove('expanded');
+  gamesHeader.classList.remove('expanded');
+}
+}
+
+// Функции валют
+function convertAmount(amount, fromCurrency, toCurrency) {
+if (fromCurrency === toCurrency) return amount;
+const usdAmount = amount / exchangeRates[fromCurrency];
+return usdAmount * exchangeRates[toCurrency];
+}
+
+function formatAmount(amount, currency = currentCurrency) {
+const symbol = currencySymbols[currency];
+if (currency === 'BTC') {
+  return `${symbol}${amount.toFixed(8)}`;
+}
+return `${symbol}${amount.toLocaleString('ru-RU', {
+  minimumFractionDigits: 2,
+  maximumFractionDigits: 2
+})}`;
+}
+
+function updateAllBalanceDisplays() {
+const balanceInCurrentCurrency = convertAmount(balance, 'USD', currentCurrency);
+document.getElementById('balanceDisplay').textContent = formatAmount(balanceInCurrentCurrency);
+
+document.getElementById('balanceUSD').textContent = formatAmount(balance, 'USD');
+document.getElementById('balanceRUB').textContent = formatAmount(convertAmount(balance, 'USD', 'RUB'), 'RUB');
+document.getElementById('balanceKZT').textContent = formatAmount(convertAmount(balance, 'USD', 'KZT'), 'KZT');
+document.getElementById('balanceBTC').textContent = formatAmount(convertAmount(balance, 'USD', 'BTC'), 'BTC');
+}
+
+function changeCurrency(currency) {
+currentCurrency = currency;
+document.querySelectorAll('.currency-btn').forEach(btn => btn.classList.remove('active'));
+document.querySelector(`[data-currency="${currency}"]`).classList.add('active');
+updateAllBalanceDisplays();
+betInput.placeholder = `Введите сумму в ${currency}`;
+}
+
+function toggleCurrencyDropdown() {
+const dropdown = document.getElementById('currencyDropdown');
+dropdown.classList.toggle('active');
+}
+
+// Закрытие выпадающего меню при клике вне его
+document.addEventListener('click', function(event) {
+const balanceSection = document.querySelector('.top-balance-section');
+const dropdown = document.getElementById('currencyDropdown');
+
+if (!balanceSection.contains(event.target)) {
+  dropdown.classList.remove('active');
+}
+});
+
+// Функция смены темы
+function changeTheme(theme) {
+document.body.setAttribute('data-theme', theme);
+document.querySelectorAll('.theme-btn').forEach(btn => btn.classList.remove('active'));
+document.querySelector(`.theme-btn.${theme}`).classList.add('active');
+}
+
+// ОБНОВЛЕНИЕ КОСМИЧЕСКИХ ОБЪЕКТОВ - ПОСЛЕДОВАТЕЛЬНОЕ ПОЯВЛЕНИЕ
+function updateSpaceObjects() {
+gameMoon.classList.remove('visible');
+gameSun.classList.remove('visible');
+gameBlackhole.classList.remove('visible');
+
+if (!gameActive) {
+  currentSpaceObject = 0;
+  return;
+}
+
+if (multiplier >= 2.5) {
+  const objectIndex = Math.floor((Date.now() / 3000) % 3);
+  
+  switch(objectIndex) {
+    case 0:
+      gameMoon.classList.add('visible');
+      break;
+    case 1:
+      gameSun.classList.add('visible');
+      break;
+    case 2:
+      gameBlackhole.classList.add('visible');
+      break;
+  }
+}
+}
+
+// Обновление фона леса
+function updateForestBackground() {
+if (gameActive) {
+  if (multiplier >= 1.5 && multiplier < 3.0) {
+    gameForestBackground.classList.add('visible');
+    gameForestBackground.classList.remove('moving');
+  } else if (multiplier >= 3.0) {
+    gameForestBackground.classList.add('moving');
+  }
+} else if (isRefueling) {
+  gameForestBackground.classList.add('visible');
+  gameForestBackground.classList.remove('moving');
+} else {
+  gameForestBackground.classList.remove('visible', 'moving');
+}
+}
+
+// Новая система вероятностей для ракеты
+function getTargetMultiplier() {
+const rand = Math.random();
+
+if (rand < 0.70) {
+  return 2.00 + Math.random() * 8.00;
+} else if (rand < 0.90) {
+  return 7.00 + Math.random() * 13.00;
+} else if (rand < 0.99) {
+  return 15.00 + Math.random() * 35.00;
+} else {
+  return 70.00 + Math.random() * 430.00;
+}
+}
+
+// Функции быстрых ставок
+function addToBet(amount) {
+const currentAmount = parseFloat(betInput.value) || 0;
+const convertedAmount = convertAmount(amount, 'USD', currentCurrency);
+betInput.value = (currentAmount + convertedAmount).toFixed(2);
+}
+
+function setBetAll() {
+const balanceInCurrentCurrency = convertAmount(balance, 'USD', currentCurrency);
+betInput.value = balanceInCurrentCurrency.toFixed(2);
+}
+
+// Функции чата поддержки
+function toggleSupportChat() {
+const chat = document.getElementById('supportChat');
+const toggle = document.getElementById('supportChatToggle');
+
+if (chat.classList.contains('active')) {
+  chat.classList.remove('active');
+  toggle.classList.remove('hidden');
+} else {
+  chat.classList.add('active');
+  toggle.classList.add('hidden');
+}
+}
+
+function handleChatKeyPress(event) {
+if (event.key === 'Enter') {
+  sendChatMessage();
+}
+}
+
+function sendChatMessage() {
+const input = document.getElementById('supportChatInput');
+const messagesContainer = document.getElementById('supportChatMessages');
+const message = input.value.trim();
+
+if (!message) return;
+
+const userMessage = document.createElement('div');
+userMessage.className = 'chat-message user';
+userMessage.textContent = message;
+messagesContainer.appendChild(userMessage);
+
+input.value = '';
+messagesContainer.scrollTop = messagesContainer.scrollHeight;
+
+setTimeout(() => {
+  const aiResponse = generateAIResponse(message);
+  const aiMessage = document.createElement('div');
+  aiMessage.className = 'chat-message ai';
+  aiMessage.textContent = aiResponse;
+  messagesContainer.appendChild(aiMessage);
+  messagesContainer.scrollTop = messagesContainer.scrollHeight;
+}, 1000);
+}
+
+function generateAIResponse(userMessage) {
+const message = userMessage.toLowerCase();
+
+if (message.includes('баланс') || message.includes('деньги') || message.includes('пополнить')) {
+  return '💰 Для пополнения баланса нажмите кнопку "Пополнить". Используйте CryptoPay в Telegram для безопасных транзакций.';
+} else if (message.includes('телеграм') || message.includes('бот')) {
+  return `🤖 Наш бот @${BOT_USERNAME} поможет с управлением балансом и получением бонусов!`;
+} else if (message.includes('вход') || message.includes('логин')) {
+  return '🔐 Рекомендуем входить через Telegram для синхронизации баланса с ботом!';
+} else {
+  const responses = [
+    '🤖 Интересный вопрос! Можете уточнить, что именно вас интересует?',
+    '💭 Я постараюсь помочь! Если не смогу ответить, направлю к нашим специалистам на ssss@mail.cr',
+    '🎮 Если нужна помощь с играми, объясню правила! По другим вопросам - ssss@mail.cr'
+  ];
+  return responses[Math.floor(Math.random() * responses.length)];
+}
+}
+
+// Функция кручения колеса фортуны с ограничением
+function spinFortuneWheel() {
+const bonusBtn = document.getElementById('bonusBtn');
+const currentTime = Date.now();
+const timeSinceLastSpin = currentTime - wheelLastSpin;
+const tenMinutes = 10 * 60 * 1000;
+
+if (timeSinceLastSpin < tenMinutes) {
+  const remainingTime = Math.ceil((tenMinutes - timeSinceLastSpin) / 1000 / 60);
+  showNotification(`Колесо можно крутить через ${remainingTime} мин`);
+  return;
+}
+
+if (bonusBtn.disabled) return;
+
+bonusBtn.disabled = true;
+bonusBtn.textContent = 'Крутится...';
+wheelLastSpin = currentTime;
+
+const prizes = [0.10, 0.25, 0.50, 1.00, 0.05, 0.75, 0.20, 0.15];
+const randomIndex = Math.floor(Math.random() * prizes.length);
+const prize = prizes[randomIndex];
+
+const rotations = 5 + Math.random() * 5;
+const finalAngle = (360 / 8) * randomIndex;
+const totalRotation = rotations * 360 + finalAngle;
+
+fortuneWheel.style.transform = `rotate(${totalRotation}deg)`;
+
+setTimeout(() => {
+  balance += prize;
+  updateAllBalanceDisplays();
+  bonusBtn.textContent = `Выиграли ${formatAmount(prize, 'USD')}!`;
+  bonusBtn.style.background = '#4caf50';
+  
+  setTimeout(() => {
+    bonusBtn.disabled = false;
+    bonusBtn.textContent = '🎰 КРУТИТЬ КОЛЕСО';
+    bonusBtn.style.background = '';
+  }, 3000);
+}, 3000);
+}
+
+// Функция покупки VIP
+function buyVip() {
+if (balance >= 1000) {
+  balance -= 1000;
+  isVip = true;
+  updateAllBalanceDisplays();
+  showNotification('Поздравляем! Вы стали VIP игроком!');
+  
+  const vipSection = document.querySelector('.vip-section');
+  vipSection.innerHTML = `
+    <div class="vip-title">👑 VIP АКТИВЕН</div>
+    <div class="vip-benefits">
+      • Эксклюзивные бонусы активны<br>
+      • Персональный менеджер доступен<br>
+      • Приоритетная поддержка<br>
+      • Особые условия игры
+    </div>
+  `;
+} else {
+  showNotification('Недостаточно средств для покупки VIP');
+}
+}
+
+// Функция обновления баланса
+function updateBalance() {
+updateAllBalanceDisplays();
+}
+
+// Функция обновления баланса (просто анимация)
+function refreshBalance() {
+const refreshBtn = document.querySelector('.refresh-balance-btn');
+refreshBtn.style.transform = 'translateY(-1px) rotate(360deg)';
+
+if (isLoggedIn && currentUser && currentUser.telegramUsername) {
+  syncBalanceWithBot(currentUser.telegramUsername);
+}
+
+setTimeout(() => {
+  updateBalance();
+  refreshBtn.style.transform = '';
+}, 500);
+}
+
+// Функция закрытия приветственного окна с картинкой
+function closeWelcomeImage() {
+document.getElementById('welcomeImageOverlay').classList.add('hidden');
+}
+
+// Функция получения приветственного бонуса
+function claimWelcomeBonus() {
+closeWelcomeImage();
+closeBonusesModal();
+openForm('depositOverlay');
+}
+
+// Функция показа уведомления
+function showNotification(message = 'Скоро будет') {
+const notification = document.getElementById('notificationOverlay');
+notification.textContent = message;
+notification.classList.add('show');
+
+setTimeout(() => {
+  notification.classList.remove('show');
+}, 3000);
+}
+
+// Функции техподдержки
+function openSupport() {
+document.getElementById('supportOverlay').classList.add('active');
+}
+
+function closeSupport() {
+document.getElementById('supportOverlay').classList.remove('active');
+}
+
+// Функция обновления интерфейса для входа/выхода
+function updateAuthInterface() {
+if (isLoggedIn) {
+  topLoginBtn.style.display = 'none';
+  topUserInfo.style.display = 'flex';
+  sidebarUserName.textContent = (currentUser.telegramUsername || currentUser.nick || 'ИГРОК').toUpperCase();
+} else {
+  topLoginBtn.style.display = 'block';
+  topUserInfo.style.display = 'none';
+  sidebarUserName.textContent = 'ИГРОК';
+}
+}
+
+// Функция обновления информации о игроках
+function updatePlayersInfo() {
+const activePlayersCount = players.length;
+const totalBets = players.reduce((sum, player) => sum + player.bet, 0);
+playersCountText.textContent = `${activePlayersCount} игроков`;
+totalBetsAmount.textContent = formatAmount(totalBets, 'USD');
+}
+
+// Остальные функции остаются без изменений...
+function updateTakeButtonAmount() {
+if (gameActive && currentBet > 0) {
+  const winAmount = currentBet * multiplier;
+  takeBtnAmount.textContent = formatAmount(winAmount, 'USD');
+} else {
+  takeBtnAmount.textContent = formatAmount(0, 'USD');
+}
+}
+
+function addToHistory(mult) {
+const inGameHistoryItem = document.createElement('div');
+inGameHistoryItem.className = 'in-game-history-item';
+inGameHistoryItem.textContent = mult.toFixed(2) + 'x';
+
+if (mult >= 30) {
+  inGameHistoryItem.classList.add('orange');
+} else if (mult >= 10) {
+  inGameHistoryItem.classList.add('purple');
+} else if (mult >= 5) {
+  inGameHistoryItem.classList.add('green');
+} else if (mult < 2) {
+  inGameHistoryItem.classList.add('red');
+}
+
+const inGameHistoryGrid = document.getElementById('in-game-history-grid');
+inGameHistoryGrid.insertBefore(inGameHistoryItem, inGameHistoryGrid.firstChild);
+while (inGameHistoryGrid.children.length > 25) {
+  inGameHistoryGrid.removeChild(inGameHistoryGrid.lastChild);
+}
+
+multiplierHistory.unshift(mult);
+if (multiplierHistory.length > 50) {
+  multiplierHistory.pop();
+}
+}
+
+function getRandomBet() {
+let bet = Math.random() * 982;
+if (bet < 1) {
+  bet = Math.round(bet * 100) / 100;
+} else if (bet < 10) {
+  bet = Math.round(bet * 10) / 10;
+} else {
+  bet = Math.round(bet);
+}
+return bet;
+}
+
+function createPlayerCard(id, bet, isCurrentPlayer = false) {
+const playerCard = document.createElement('div');
+playerCard.className = 'player-card';
+playerCard.id = `player-${id}`;
+if (isCurrentPlayer) {
+  playerCard.classList.add('current-player');
+  currentPlayerId = id;
+}
+
+const playerName = document.createElement('div');
+playerName.className = 'player-name';
+playerName.textContent = 'ИГРОК';
+
+const playerBet = document.createElement('div');
+playerBet.className = 'player-bet';
+playerBet.textContent = `Поставил: ${formatAmount(bet, 'USD')}`;
+
+playerCard.appendChild(playerName);
+playerCard.appendChild(playerBet);
+playersContainer.appendChild(playerCard);
+
+return {
+  id,
+  bet,
+  hasWon: false,
+  element: playerCard,
+  betElement: playerBet
+};
+}
+
+function updatePlayerWin(playerId, winAmount) {
+const player = players.find(p => p.id === playerId);
+if (!player) return;
+
+player.hasWon = true;
+player.element.classList.add('won');
+
+const playerWin = document.createElement('div');
+playerWin.className = 'player-win';
+playerWin.textContent = `Выиграл: ${formatAmount(winAmount, 'USD')}`;
+player.element.appendChild(playerWin);
+}
+
+function updatePlayerLoss(playerId) {
+const player = players.find(p => p.id === playerId);
+if (!player || player.hasWon) return;
+player.element.classList.add('lost');
+}
+
+function addPlayersGradually() {
+const playersInfo = document.querySelector('.players-info');
+playersContainer.innerHTML = '';
+if (playersInfo) {
+  playersContainer.appendChild(playersInfo);
+}
+players = [];
+updatePlayersInfo();
+
+const numPlayers = Math.floor(Math.random() * (321 - 51 + 1)) + 51;
+let playersAdded = 0;
+
+playerAddInterval = setInterval(() => {
+  if (playersAdded < numPlayers && (waitingForBet || isRefueling)) {
+    const bet = getRandomBet();
+    const player = createPlayerCard(playersAdded, bet);
+    players.push(player);
+    playersAdded++;
+    updatePlayersInfo();
+  } else {
+    clearInterval(playerAddInterval);
+  }
+}, Math.random() * 100 + 50);
+}
+
+function smartPlayerWins() {
+if (!gameActive) return;
+
+let winChance = 0;
+if (multiplier >= 10) {
+  winChance = 0.9;
+} else if (multiplier >= 5) {
+  winChance = 0.7;
+} else if (multiplier >= 2) {
+  winChance = 0.3;
+} else {
+  return;
+}
+
+players.forEach(player => {
+  if (!player.hasWon && Math.random() < (winChance * 0.1)) {
+    const winAmount = player.bet * multiplier;
+    updatePlayerWin(player.id, winAmount);
+  }
+});
+}
+
+// 3D сцена создание
+function createScene() {
+HEIGHT = 350;
+WIDTH = 350;
+scene = new THREE.Scene();
+scene.fog = new THREE.Fog(0x5d0361, 10, 1500);
+camera = new THREE.PerspectiveCamera(60, WIDTH / HEIGHT, 1, 10000);
+camera.position.set(0, -10, 500);
+renderer = new THREE.WebGLRenderer({ alpha: true, antialias: true });
+renderer.setSize(WIDTH, HEIGHT);
+renderer.shadowMap.enabled = true;
+const container = document.getElementById("canvas");
+if (container) {
+  container.innerHTML = '';
+  container.appendChild(renderer.domElement);
+}
+
+const loader = new THREE.GLTFLoader();
+loader.load("https://stivs.dev/assets/rocket/rocket.gltf", (gltf) => {
+  if (rocket) {
+    scene.remove(rocket);
+  }
+  rocket = gltf.scene;
+  rocket.position.y = 50;
+  scene.add(rocket);
+});
+}
+
+function createLights() {
+const ambientLight = new THREE.HemisphereLight(0x404040, 0x404040, 1);
+const directionalLight = new THREE.DirectionalLight(0xdfebff, 1);
+directionalLight.position.set(-300, 0, 600);
+const pointLight = new THREE.PointLight(0xa11148, 2, 1000, 2);
+pointLight.position.set(200, -100, 50);
+scene.add(ambientLight, directionalLight, pointLight);
+}
+
+function loop() {
+if (!renderer || !scene || !camera) return;
+renderer.render(scene, camera);
+if (rocket) {
+  if (gameActive) {
+    const t = (Date.now() % 2000) / 2000;
+    const delta = 40 * Math.sin(Math.PI * 2 * t);
+    rocket.rotation.y += 0.1;
+    rocket.position.y = delta;
+  } else {
+    rocket.rotation.y = 0;
+    rocket.position.y = 50;
+  }
+}
+requestAnimationFrame(loop);
+}
+
+// Показать заглушку
+function showStub() {
+document.getElementById('rocket-stub').style.display = 'block';
+cssRocketContainer.style.display = 'none';
+document.getElementById('rocket-3d-wrapper').style.display = 'none';
+refuelingContainer.style.display = 'none';
+hideExplosion();
+rocketStub.classList.remove('active');
+cssRocketScene.classList.remove('game-active', 'launching');
+}
+
+// Показать CSS ракету
+function showCSSRocket() {
+document.getElementById('rocket-stub').style.display = 'none';
+cssRocketContainer.style.display = 'flex';
+document.getElementById('rocket-3d-wrapper').style.display = 'none';
+refuelingContainer.style.display = 'none';
+hideExplosion();
+}
+
+// Показать 3D ракету
+function showRocket3D() {
+document.getElementById('rocket-stub').style.display = 'none';
+cssRocketContainer.style.display = 'none';
+document.getElementById('rocket-3d-wrapper').style.display = 'block';
+refuelingContainer.style.display = 'none';
+hideExplosion();
+}
+
+// Показать экран заправки
+function showRefueling() {
+document.getElementById('rocket-stub').style.display = 'none';
+cssRocketContainer.style.display = 'none';
+document.getElementById('rocket-3d-wrapper').style.display = 'none';
+refuelingContainer.style.display = 'flex';
+hideExplosion();
+rocketStub.classList.remove('active');
+cssRocketScene.classList.remove('game-active', 'launching');
+}
+
+// Показать взрыв - ИСПОЛЬЗУЕМ ПРИКРЕПЛЕННЫЙ ГИФ
+function showExplosion() {
+hideExplosion();
+const rocketContainer = document.querySelector('.rocket-container');
+explosionElement = document.createElement('div');
+explosionElement.className = 'explosion';
+explosionElement.innerHTML = '<img src="/public/анимация.gif" alt="Explosion">';
+rocketContainer.appendChild(explosionElement);
+document.getElementById('rocket-stub').style.display = 'none';
+cssRocketContainer.style.display = 'none';
+document.getElementById('rocket-3d-wrapper').style.display = 'none';
+refuelingContainer.style.display = 'none';
+rocketStub.classList.remove('active');
+cssRocketScene.classList.remove('game-active', 'launching');
+}
+
+// Скрыть взрыв
+function hideExplosion() {
+if (explosionElement) {
+  explosionElement.remove();
+  explosionElement = null;
+}
+}
+
+// Показать анимацию выигрыша
+function showWinAnimation(winAmount) {
+const rocketContainer = document.querySelector('.rocket-container');
+const winElement = document.createElement('div');
+winElement.className = 'win-animation';
+winElement.textContent = `+${formatAmount(winAmount, 'USD')}`;
+rocketContainer.appendChild(winElement);
+setTimeout(() => {
+  if (winElement && winElement.parentNode) {
+    winElement.parentNode.removeChild(winElement);
+  }
+}, 2000);
+}
+
+// Начать заправку
+function startRefueling() {
+if (isRefueling) return;
+
+isRefueling = true;
+waitingForBet = true;
+refuelingProgress = 0;
+showRefueling();
+gameStatus.textContent = 'Заправляем ракету';
+updateForestBackground();
+if (playerAddInterval) {
+  clearInterval(playerAddInterval);
+}
+refuelingInterval = setInterval(() => {
+  refuelingProgress += 2;
+  progressBar.style.width = refuelingProgress + '%';
+  if (refuelingProgress >= 100) {
+    clearInterval(refuelingInterval);
+    isRefueling = false;
+    startGame();
+  }
+}, 100);
+}
+
+// Начать игру
+function startGame() {
+if (gameActive) return;
+
+showCSSRocket();
+cssRocketScene.classList.add('launching');
+setTimeout(() => {
+  cssRocketScene.classList.remove('launching');
+  cssRocketScene.classList.add('game-active');
+}, 2000);
+
+const betAmount = parseFloat(betInput.value) || 0;
+const targetMultiplier = getTargetMultiplier();
+
+if (betPlaced && !isNaN(betAmount) && betAmount > 0) {
+  const betAmountInUSD = convertAmount(betAmount, currentCurrency, 'USD');
+  if (betAmountInUSD > balance) {
+    gameStatus.textContent = 'Недостаточно средств';
+    currentBet = 0;
+    betPlaced = false;
+    waitForBet();
+    return;
+  } else {
+    currentBet = betAmountInUSD;
+    document.querySelector('.take-btn').style.display = 'flex';
+    document.querySelector('.cancel-btn').style.display = 'none';
+    if (currentPlayerId !== null) {
+      const oldPlayerCard = document.getElementById(`player-${currentPlayerId}`);
+      if (oldPlayerCard) {
+        oldPlayerCard.classList.remove('current-player');
+      }
+    }
+    const newPlayerId = players.length;
+    const player = createPlayerCard(newPlayerId, betAmountInUSD, true);
+    players.push(player);
+    if (isLoggedIn) {
+      userBetsHistory.push({
+        amount: betAmountInUSD,
+        multiplier: 0,
+        result: 'pending',
+        timestamp: new Date()
+      });
+    }
+  }
+} else {
+  currentBet = 0;
+  document.querySelector('.take-btn').style.display = 'none';
+}
+
+multiplier = 1.00;
+multiplierSpeed = 0.01;
+gameActive = true;
+waitingForBet = false;
+playerTookWin = false;
+gameStatus.textContent = 'Ракета взлетает!';
+multiplierEl.textContent = `${multiplier.toFixed(2)}x`;
+document.querySelector('.bet-btn').style.display = 'none';
+
+gameInterval = setInterval(() => {
+  multiplierSpeed += 0.0005;
+  multiplier += multiplierSpeed;
+  multiplier = parseFloat(multiplier.toFixed(2));
+  multiplierEl.textContent = `${multiplier.toFixed(2)}x`;
+  updateTakeButtonAmount();
+  updateSpaceObjects();
+  updateForestBackground();
+
+  if (autoCashoutEnabled && multiplier >= autoCashoutMultiplier && currentBet > 0 && !playerTookWin) {
+    takeWin();
+  }
+
+  smartPlayerWins();
+
+  if (multiplier >= targetMultiplier) {
+    endGame(true, targetMultiplier);
+  }
+}, 100);
+
+betPlaced = false;
+}
+
+// Забрать выигрыш
+function takeWin() {
+if (!gameActive) return;
+const winAmount = currentBet * multiplier;
+balance += winAmount;
+updateAllBalanceDisplays();
+gameStatus.textContent = `Вы выиграли ${formatAmount(winAmount, 'USD')}!`;
+document.querySelector('.take-btn').style.display = 'none';
+playerTookWin = true;
+showWinAnimation(winAmount);
+
+if (currentPlayerId !== null) {
+  updatePlayerWin(currentPlayerId, winAmount);
+}
+
+if (isLoggedIn && userBetsHistory.length > 0) {
+  const lastBet = userBetsHistory[userBetsHistory.length - 1];
+  if (lastBet.result === 'pending') {
+    lastBet.multiplier = multiplier;
+    lastBet.result = 'win';
+    lastBet.winAmount = winAmount;
+  }
+}
+
+setTimeout(() => {
+  gameStatus.textContent = 'Ракета готовится снова...';
+}, 2000);
+}
+
+// Поставить ставку
+function placeBet() {
+if ((waitingForBet || isRefueling) && !betPlaced) {
+  const betAmount = parseFloat(betInput.value);
+  if (isNaN(betAmount) || betAmount <= 0) {
+    gameStatus.textContent = 'Введите корректную сумму ставки';
+    return;
+  }
+
+  const betAmountInUSD = convertAmount(betAmount, currentCurrency, 'USD');
+  if (betAmountInUSD > balance) {
+    gameStatus.textContent = 'Недостаточно средств';
+    return;
+  }
+
+  balance -= betAmountInUSD;
+  updateAllBalanceDisplays();
+  betPlaced = true;
+  document.querySelector('.bet-btn').style.display = 'none';
+  document.querySelector('.cancel-btn').style.display = 'block';
+  gameStatus.textContent = 'Ставка принята!';
+}
+}
+
+// Отмена ставки
+function cancelBet() {
+if (gameActive || !betPlaced) return;
+const betAmount = parseFloat(betInput.value);
+if (!isNaN(betAmount) && betAmount > 0) {
+  const betAmountInUSD = convertAmount(betAmount, currentCurrency, 'USD');
+  balance += betAmountInUSD;
+  updateAllBalanceDisplays();
+  gameStatus.textContent = 'Ставка отменена';
+}
+betPlaced = false;
+currentBet = 0;
+document.querySelector('.cancel-btn').style.display = 'none';
+document.querySelector('.bet-btn').style.display = 'block';
+setTimeout(() => {
+  gameStatus.textContent = 'Ожидание ставок!';
+}, 2000);
+}
+
+// Конец игры
+function endGame(crashed, finalMultiplier) {
+clearInterval(gameInterval);
+gameActive = false;
+cssRocketScene.classList.remove('game-active', 'launching');
+if (crashed) {
+  showExplosion();
+}
+
+players.forEach(player => {
+  if (!player.hasWon) {
+    updatePlayerLoss(player.id);
+  }
+});
+
+addToHistory(finalMultiplier || multiplier);
+
+if (isLoggedIn && userBetsHistory.length > 0) {
+  const lastBet = userBetsHistory[userBetsHistory.length - 1];
+  if (lastBet.result === 'pending') {
+    lastBet.multiplier = finalMultiplier || multiplier;
+    lastBet.result = 'loss';
+  }
+}
+
+if (crashed) {
+  multiplierEl.textContent = 'Ракета взорвалась!';
+  multiplierEl.style.color = '#ff4444';
+  multiplierEl.style.fontSize = '32px';
+  if (playerTookWin) {
+    gameStatus.textContent = 'Ракета взорвалась, но вы успели забрать выигрыш!';
+  } else {
+    gameStatus.textContent = 'Ракета взорвалась!';
+  }
+} else {
+  gameStatus.textContent = 'Ракета улетела!';
+}
+
+document.querySelector('.take-btn').style.display = 'none';
+document.querySelector('.cancel-btn').style.display = 'none';
+
+setTimeout(() => {
+  multiplierEl.style.color = 'var(--accent-color)';
+  multiplierEl.style.fontSize = '48px';
+  waitForBet();
+}, 3000);
+}
+
+// Ожидание ставок
+function waitForBet() {
+waitingForBet = true;
+multiplier = 0;
+currentBet = 0;
+multiplierEl.textContent = '×0';
+gameStatus.textContent = 'Ожидание ставок!';
+document.querySelector('.bet-btn').style.display = 'block';
+document.querySelector('.take-btn').style.display = 'none';
+document.querySelector('.cancel-btn').style.display = 'none';
+updateTakeButtonAmount();
+betPlaced = false;
+currentPlayerId = null;
+updateSpaceObjects();
+updateForestBackground();
+if (playerAddInterval) {
+  clearInterval(playerAddInterval);
+}
+
+addPlayersGradually();
+setTimeout(() => {
+  startRefueling();
+}, 2000);
+}
+
+// Переключение авто кешаута
+function toggleAutoCashout() {
+autoCashoutEnabled = !autoCashoutEnabled;
+toggleSwitch.classList.toggle('active');
+autoCashoutInput.disabled = !autoCashoutEnabled;
+
+if (autoCashoutEnabled) {
+  autoCashoutInput.classList.add('active');
+  autoCashoutMultiplier = parseFloat(autoCashoutInput.value) || 2.00;
+} else {
+  autoCashoutInput.classList.remove('active');
+}
+}
+
+// Обновление значения авто кешаута
+autoCashoutInput.addEventListener('input', (e) => {
+const value = parseFloat(e.target.value);
+if (!isNaN(value) && value >= 1.01) {
+  autoCashoutMultiplier = value;
+}
+});
+
+// Функции боковой панели
+function showProfile() {
+if (isLoggedIn) {
+  showBetsHistory();
+} else {
+  showNotification('Войдите в аккаунт для просмотра профиля');
+}
+}
+
+function selectGame(game) {
+document.querySelectorAll('.game-item').forEach(btn => btn.classList.remove('active'));
+
+switch(game) {
+  case 'crash':
+    document.querySelector('.game-item:nth-child(1)').classList.add('active');
+    break;
+  case 'miner':
+    document.querySelector('.game-item:nth-child(2)').classList.add('active');
+    openMinerGame();
+    break;
+  case 'bonuses':
+    document.querySelector('.game-item:nth-child(3)').classList.add('active');
+    openBonusesModal();
+    break;
+}
+}
+
+// Открыть/закрыть формы
+function openForm(formId) {
+document.getElementById(formId).classList.add('active');
+}
+
+function closeForm(formId) {
+document.getElementById(formId).classList.remove('active');
+if (formId === 'loginOverlay') {
+  document.getElementById('loginStatus').textContent = '';
+} else if (formId === 'depositOverlay') {
+  document.getElementById('depositStatus').textContent = '';
+} else if (formId === 'withdrawOverlay') {
+  document.getElementById('withdrawStatus').textContent = '';
+}
+}
+
+// Открыть окно бонусов
+function openBonusesModal() {
+document.getElementById('bonusesOverlay').classList.add('active');
+}
+
+// Закрыть окно бонусов
+function closeBonusesModal() {
+document.getElementById('bonusesOverlay').classList.remove('active');
+}
+
+// Функция пополнения баланса
+function processDeposit() {
+const amount = parseFloat(document.getElementById('depositAmount').value);
+const depositStatus = document.getElementById('depositStatus');
+
+if (isNaN(amount) || amount <= 0) {
+  depositStatus.textContent = 'Введите корректную сумму';
+  depositStatus.style.color = '#ff4444';
+  return;
+}
+
+balance += amount;
+updateAllBalanceDisplays();
+depositStatus.textContent = `Баланс пополнен на ${formatAmount(amount, 'USD')}`;
+depositStatus.style.color = '#4caf50';
+
+setTimeout(() => {
+  closeForm('depositOverlay');
+}, 2000);
+}
+
+// Функция вывода средств
+function processWithdraw() {
+const withdrawStatus = document.getElementById('withdrawStatus');
+withdrawStatus.textContent = 'Заявка на вывод принята';
+withdrawStatus.style.color = '#4caf50';
+
+setTimeout(() => {
+  closeForm('withdrawOverlay');
+}, 2000);
+}
+
+// Показать историю ставок
+function showBetsHistory() {
+const historyList = document.getElementById('betsHistoryList');
+historyList.innerHTML = '';
+
+if (userBetsHistory.length === 0) {
+  historyList.innerHTML = '<p style="text-align: center; color: #aaa;">История ставок пуста</p>';
+} else {
+  userBetsHistory.slice().reverse().forEach(bet => {
+    const betItem = document.createElement('div');
+    betItem.style.cssText = `
+      background: var(--bg-card);
+      border-radius: 8px;
+      padding: 10px;
+      margin-bottom: 10px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    `;
+
+    const betInfo = document.createElement('div');
+    betInfo.innerHTML = `
+      <div style="font-weight: bold; color: var(--accent-color);">${formatAmount(bet.amount, 'USD')}</div>
+      <div style="font-size: 12px; color: var(--text-secondary);">${bet.timestamp.toLocaleString()}</div>
+    `;
+
+    const betResult = document.createElement('div');
+    betResult.style.fontWeight = 'bold';
+
+    if (bet.result === 'win') {
+      betResult.textContent = `+${formatAmount(bet.winAmount, 'USD')}`;
+      betResult.style.color = '#2ecc71';
+    } else if (bet.result === 'loss') {
+      betResult.textContent = `-${formatAmount(bet.amount, 'USD')}`;
+      betResult.style.color = '#e74c3c';
+    } else {
+      betResult.textContent = 'В процессе';
+      betResult.style.color = 'var(--accent-color)';
+    }
+
+    betItem.appendChild(betInfo);
+    betItem.appendChild(betResult);
+    historyList.appendChild(betItem);
+  });
+}
+
+openForm('betsHistoryOverlay');
+}
+
+// Функции для игры минер
+function openMinerGame() {
+document.getElementById('minerOverlay').classList.add('active');
+initMinerGrid();
+}
+
+function closeMinerGame() {
+document.getElementById('minerOverlay').classList.remove('active');
+resetMinerGame();
+}
+
+function initMinerGrid() {
+const grid = document.getElementById('minerGrid');
+grid.innerHTML = '';
+for (let i = 0; i < 25; i++) {
+  const cell = document.createElement('div');
+  cell.className = 'miner-cell';
+  cell.dataset.index = i;
+  cell.addEventListener('click', () => revealCell(i));
+  grid.appendChild(cell);
+}
+}
+
+function startMinerGame() {
+const minesCount = parseInt(document.getElementById('minesCount').value);
+const betAmount = parseFloat(document.getElementById('minerBetAmount').value);
+
+if (betAmount > balance) {
+  alert('Недостаточно средств');
+  return;
+}
+
+if (minesCount < 1 || minesCount > 24) {
+  alert('Количество мин должно быть от 1 до 24');
+  return;
+}
+
+balance -= betAmount;
+updateAllBalanceDisplays();
+
+minerGame.active = true;
+minerGame.betAmount = betAmount;
+minerGame.multiplier = 1.0;
+minerGame.safeSpots = 0;
+minerGame.revealed = [];
+minerGame.mines = [];
+
+while (minerGame.mines.length < minesCount) {
+  const pos = Math.floor(Math.random() * 25);
+  if (!minerGame.mines.includes(pos)) {
+    minerGame.mines.push(pos);
+  }
+}
+
+document.getElementById('startMinerBtn').style.display = 'none';
+document.getElementById('cashoutMinerBtn').style.display = 'block';
+updateMinerStats();
+}
+
+function revealCell(index) {
+if (!minerGame.active || minerGame.revealed.includes(index)) return;
+
+const cell = document.querySelector(`[data-index="${index}"]`);
+minerGame.revealed.push(index);
+
+if (minerGame.mines.includes(index)) {
+  cell.classList.add('mine');
+  cell.textContent = '💣';
+  endMinerGame(false);
+} else {
+  cell.classList.add('revealed');
+  cell.textContent = '💎';
+  minerGame.safeSpots++;
+  
+  const safeSpots = 25 - minerGame.mines.length;
+  const multiplierIncrease = 1 + (minerGame.safeSpots / safeSpots) * 2;
+  minerGame.multiplier = multiplierIncrease;
+  updateMinerStats();
+  
+  if (minerGame.safeSpots === safeSpots) {
+    endMinerGame(true);
+  }
+}
+}
+
+function cashoutMiner() {
+if (!minerGame.active) return;
+endMinerGame(true);
+}
+
+function endMinerGame(won) {
+minerGame.active = false;
+
+if (won) {
+  const winAmount = minerGame.betAmount * minerGame.multiplier;
+  balance += winAmount;
+  updateAllBalanceDisplays();
+  alert(`Вы выиграли ${formatAmount(winAmount, 'USD')}!`);
+} else {
+  minerGame.mines.forEach(mineIndex => {
+    const cell = document.querySelector(`[data-index="${mineIndex}"]`);
+    if (!cell.classList.contains('mine')) {
+      cell.classList.add('mine');
+      cell.textContent = '💣';
+    }
+  });
+  alert('Вы попали на мину!');
+}
+
+document.getElementById('startMinerBtn').style.display = 'block';
+document.getElementById('cashoutMinerBtn').style.display = 'none';
+
+setTimeout(() => {
+  resetMinerGame();
+}, 3000);
+}
+
+function resetMinerGame() {
+minerGame = {
+  active: false,
+  grid: [],
+  mines: [],
+  revealed: [],
+  betAmount: 0,
+  multiplier: 1.0,
+  safeSpots: 0
+};
+initMinerGrid();
+updateMinerStats();
+}
+
+function updateMinerStats() {
+const winAmount = minerGame.betAmount * minerGame.multiplier;
+document.getElementById('minerStats').textContent = 
+  `Множитель: ${minerGame.multiplier.toFixed(2)}x | Потенциальный выигрыш: ${formatAmount(winAmount, 'USD')}`;
+}
+
+// Обновление статистики сайта
+function updateSiteStats() {
+const onlineCount = document.getElementById('onlineCount');
+const currentOnline = parseInt(onlineCount.textContent.replace(',', ''));
+const newOnline = currentOnline + Math.floor(Math.random() * 20) - 10;
+onlineCount.textContent = Math.max(3000, newOnline).toLocaleString();
+
+const withdrawnToday = document.getElementById('withdrawnToday');
+const currentWithdrawn = parseInt(withdrawnToday.textContent.replace(/[$,]/g, ''));
+const newWithdrawn = currentWithdrawn + Math.floor(Math.random() * 1000);
+withdrawnToday.textContent = `$${newWithdrawn.toLocaleString()}`;
+}
+
+// Инициализация при загрузке страницы
+document.addEventListener('DOMContentLoaded', () => {
+startLoading();
+updateAllBalanceDisplays();
+updateAuthInterface();
+startComets();
+
+// Развернуть секцию игр по умолчанию
+document.getElementById('gamesList').classList.add('expanded');
+document.getElementById('gamesHeader').classList.add('expanded');
+
+// Инициализация 3D сцены
+if (typeof THREE !== 'undefined') {
+  createScene();
+  createLights();
+  loop();
+  sceneInitialized = true;
+}
+
+// Запуск игры
+waitForBet();
+
+// Обновление статистики каждые 30 секунд
+setInterval(updateSiteStats, 30000);
+
+// Показать приветственное окно с картинкой через 2 секунды
+setTimeout(() => {
+  document.getElementById('welcomeImageOverlay').classList.remove('hidden');
+}, 2000);
+});
+</script>
+
+
+<!-- START: USER AUTH / BALANCE SYNC SCRIPT -->
+<script>
+/*
+  Simple login & balance sync.
+  - Prompts for username on login button click.
+  - Calls login.php (POST) to create or update user, receives balance and dates.
+  - refreshBalance(username) fetches current balance from get_balance.php.
+  Make sure your server serves the PHP files and the database credentials in db.php are set.
+*/
+
+function setTopUsername(name){
+  const el = document.querySelector(".top-username");
+  if(el) el.textContent = name;
+}
+// safe set balance (2 decimals)
+function setTopBalance(amount){
+  const el = document.querySelector(".top-balance-amount");
+  if(el) el.textContent = Number(amount).toFixed(2);
+}
+
+function loginUserPrompt(){
+  let username = prompt("Введите ваш ник:");
+  if(!username) return;
+  loginUser(username);
+}
+
+function loginUser(username){
+  fetch("login.php", {
+    method: "POST",
+    headers: { "Content-Type": "application/x-www-form-urlencoded" },
+    body: new URLSearchParams({ username: username })
+  })
+  .then(r => r.json())
+  .then(data => {
+    if(data.status === "success"){
+      setTopUsername(data.username);
+      setTopBalance(data.balance);
+      console.log("Регистрация:", data.reg_date, "Последний вход:", data.last_login);
+      // store current username in sessionStorage for future refreshes
+      sessionStorage.setItem("gs_username", data.username);
+    } else {
+      alert("Ошибка: " + (data.message || "Unknown"));
+    }
+  })
+  .catch(e => { console.error(e); alert("Ошибка сети"); });
+}
+
+function refreshBalanceStoredUser(){
+  const username = sessionStorage.getItem("gs_username");
+  if(!username) return;
+  fetch("get_balance.php?username=" + encodeURIComponent(username))
+    .then(r => r.json())
+    .then(data => {
+      if(data.status === "success"){
+        setTopBalance(data.balance);
+      } else {
+        console.warn("Balance refresh failed:", data.message);
+      }
+    })
+    .catch(e => console.error(e));
+}
+
+// Hook login button if exists
+document.addEventListener("DOMContentLoaded", function(){
+  // if there is a login button with class .top-login-btn -> override
+  const loginBtn = document.querySelector(".top-login-btn");
+  if(loginBtn){
+    loginBtn.addEventListener("click", function(e){
+      e.preventDefault();
+      loginUserPrompt();
+    });
+  }
+  // show stored username on load
+  const stored = sessionStorage.getItem("gs_username");
+  if(stored) setTopUsername(stored);
+  // initial balance refresh
+  setTimeout(refreshBalanceStoredUser, 500);
+});
+</script>
+<!-- END: USER AUTH / BALANCE SYNC SCRIPT -->
+
+</body>
+</html>
