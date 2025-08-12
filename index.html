@@ -3189,6 +3189,106 @@ transform: translateY(-2px);
 box-shadow: 0 6px 15px rgba(255, 140, 0, 0.4);
 }
 
+/* Окно пополнения с бонусом */
+.deposit-bonus-modal {
+position: fixed;
+top: 0;
+left: 0;
+width: 100%;
+height: 100%;
+background: rgba(0, 0, 0, 0.7);
+display: flex;
+justify-content: center;
+align-items: center;
+z-index: 2001;
+opacity: 0;
+visibility: hidden;
+transition: all 0.3s ease;
+}
+
+.deposit-bonus-modal.active {
+opacity: 1;
+visibility: visible;
+}
+
+.deposit-bonus-container {
+background: linear-gradient(135deg, #ff6b6b, #ff8e53);
+border-radius: 20px;
+padding: 30px;
+width: 90%;
+max-width: 450px;
+box-shadow: 0 15px 40px rgba(0, 0, 0, 0.6);
+transform: translateY(20px);
+transition: all 0.4s ease;
+text-align: center;
+position: relative;
+}
+
+.deposit-bonus-modal.active .deposit-bonus-container {
+transform: translateY(0);
+}
+
+.deposit-bonus-close {
+position: absolute;
+top: 15px;
+right: 15px;
+background: none;
+border: none;
+color: white;
+font-size: 24px;
+cursor: pointer;
+width: 40px;
+height: 40px;
+border-radius: 50%;
+display: flex;
+align-items: center;
+justify-content: center;
+transition: all 0.3s ease;
+}
+
+.deposit-bonus-close:hover {
+background: rgba(255, 255, 255, 0.1);
+}
+
+.deposit-bonus-title {
+font-size: 24px;
+font-weight: bold;
+color: white;
+margin-bottom: 20px;
+}
+
+.deposit-bonus-icon {
+font-size: 64px;
+margin-bottom: 20px;
+}
+
+.deposit-bonus-text {
+font-size: 18px;
+color: white;
+margin-bottom: 30px;
+line-height: 1.5;
+font-weight: bold;
+}
+
+.deposit-bonus-continue {
+background: linear-gradient(135deg, #ffd700, #ffed4e);
+border: none;
+border-radius: 12px;
+color: #000;
+padding: 15px 30px;
+font-size: 16px;
+font-weight: bold;
+cursor: pointer;
+transition: all 0.3s ease;
+min-height: 50px;
+width: 100%;
+}
+
+.deposit-bonus-continue:hover {
+transform: translateY(-2px);
+box-shadow: 0 6px 15px rgba(255, 215, 0, 0.4);
+}
+
 /* Формы */
 .form-overlay {
 position: fixed;
@@ -4128,6 +4228,30 @@ to {
   background: rgba(0, 0, 0, 0.5);
   z-index: -1;
 }
+
+.deposit-bonus-container {
+  width: 95%;
+  padding: 20px;
+  max-width: 400px;
+}
+
+.deposit-bonus-title {
+  font-size: 20px;
+}
+
+.deposit-bonus-icon {
+  font-size: 50px;
+}
+
+.deposit-bonus-text {
+  font-size: 16px;
+}
+
+.deposit-bonus-continue {
+  padding: 12px 20px;
+  font-size: 14px;
+  min-height: 48px;
+}
 }
 
 @media (max-width: 480px) {
@@ -4457,6 +4581,11 @@ to {
   width: calc(100% - 10px);
   max-width: 320px;
 }
+
+.deposit-bonus-container {
+  width: 95%;
+  padding: 15px;
+}
 }
 
 /* ДОПОЛНИТЕЛЬНЫЕ СТИЛИ ДЛЯ ОЧЕНЬ МАЛЕНЬКИХ ЭКРАНОВ */
@@ -4668,6 +4797,20 @@ to {
 </div>
 </div>
 
+<!-- Модальное окно с бонусом +500% -->
+<div class="deposit-bonus-modal" id="depositBonusModal">
+<div class="deposit-bonus-container">
+  <button class="deposit-bonus-close" onclick="closeDepositBonus()">×</button>
+  <div class="deposit-bonus-title">🎉 СУПЕР БОНУС!</div>
+  <div class="deposit-bonus-icon">💰</div>
+  <div class="deposit-bonus-text">
+    Вы получите +500% к первому пополнению!<br>
+    Максимальный бонус до $5000!
+  </div>
+  <button class="deposit-bonus-continue" onclick="continueToDeposit()">ПРОДОЛЖИТЬ ПОПОЛНЕНИЕ</button>
+</div>
+</div>
+
 <!-- Всплывающее уведомление -->
 <div class="notification-overlay" id="notificationOverlay">
 Скоро будет
@@ -4817,7 +4960,7 @@ to {
       <div class="top-balance-amount" id="balanceDisplay">$1.00</div>
     </div>
     <div class="top-action-buttons">
-      <button class="top-action-btn top-deposit-btn" onclick="openForm('depositOverlay')">Пополнить</button>
+      <button class="top-action-btn top-deposit-btn" onclick="showDepositBonusModal()">Пополнить</button>
       <button class="top-action-btn top-withdraw-btn" onclick="openForm('withdrawOverlay')">Вывод</button>
     </div>
 
@@ -5217,6 +5360,9 @@ let currentSpaceObject = 0;
 let cometsInterval;
 let multiplier = 1.00;
 
+// НОВЫЕ ПЕРЕМЕННЫЕ ДЛЯ УЧЕТА КОЛИЧЕСТВА ИГР
+let gamesPlayed = 0;
+
 // ДАННЫЕ ДЛЯ ДВУХ СТАВОК
 let betsData = {
 1: {
@@ -5448,6 +5594,20 @@ showNotification('Переход в CryptoPay Telegram...');
 
 function openDepositFromWelcome() {
 closeWelcomeImage();
+showDepositBonusModal();
+}
+
+// ФУНКЦИИ ДЛЯ МОДАЛЬНОГО ОКНА С БОНУСОМ
+function showDepositBonusModal() {
+document.getElementById('depositBonusModal').classList.add('active');
+}
+
+function closeDepositBonus() {
+document.getElementById('depositBonusModal').classList.remove('active');
+}
+
+function continueToDeposit() {
+closeDepositBonus();
 openForm('depositOverlay');
 }
 
@@ -5606,18 +5766,49 @@ if (gameActive) {
 }
 }
 
+// ОБНОВЛЕННАЯ ФУНКЦИЯ ГЕНЕРАЦИИ МНОЖИТЕЛЯ С НОВОЙ ЛОГИКОЙ
 function getTargetMultiplier() {
+gamesPlayed++;
+
+// Первые 3 игры для нового пользователя
+if (gamesPlayed === 1) {
+  // Первая игра: 5.00x - 11.00x
+  return 5.00 + Math.random() * 6.00;
+} else if (gamesPlayed === 2 || gamesPlayed === 3) {
+  // Вторая и третья игра: 2.50x - 3.00x
+  return 2.50 + Math.random() * 0.50;
+}
+
+// Начиная с 4-й игры - обычный рандом
 const rand = Math.random();
 
-if (rand < 0.70) {
-  return 2.00 + Math.random() * 8.00;
-} else if (rand < 0.90) {
-  return 7.00 + Math.random() * 13.00;
-} else if (rand < 0.99) {
-  return 15.00 + Math.random() * 35.00;
-} else {
-  return 70.00 + Math.random() * 430.00;
+// 5% шанс на очень низкий множитель (0.00x - 1.40x)
+if (rand < 0.05) {
+  const lowRand = Math.random();
+  if (lowRand < 0.3) {
+    return 0.00; // Редкий случай 0.00x
+  } else {
+    return 1.00 + Math.random() * 0.40; // 1.00x - 1.40x
+  }
 }
+
+// 35% шанс на множитель меньше 3.00x (общий шанс больше 3.00x = 60%)
+if (rand < 0.40) {
+  return 1.50 + Math.random() * 1.50; // 1.50x - 3.00x
+}
+
+// 35% шанс на множитель 3.00x - 7.50x
+if (rand < 0.75) {
+  return 3.00 + Math.random() * 4.50; // 3.00x - 7.50x
+}
+
+// 15% шанс на множитель больше 7.50x (общий шанс больше 7.5x = 40% - 25% = 15%)
+if (rand < 0.90) {
+  return 7.50 + Math.random() * 25.00; // 7.50x - 32.50x
+}
+
+// 10% шанс на очень высокий множитель до 120.00x максимум
+return 32.50 + Math.random() * 87.50; // 32.50x - 120.00x
 }
 
 // ФУНКЦИИ ДЛЯ ДВУХ СТАВОК
@@ -5628,10 +5819,18 @@ const convertedAmount = convertAmount(amount, 'USD', currentCurrency);
 betInput.value = (currentAmount + convertedAmount).toFixed(2);
 }
 
+// ИСПРАВЛЕННАЯ ФУНКЦИЯ ДЛЯ КНОПКИ "ВСЕ"
 function setBetAll(betNum) {
 const betInput = document.getElementById(`betInput${betNum}`);
 const balanceInCurrentCurrency = convertAmount(balance, 'USD', currentCurrency);
-betInput.value = balanceInCurrentCurrency.toFixed(2);
+
+// Проверяем, что баланс больше 0
+if (balanceInCurrentCurrency > 0) {
+  betInput.value = balanceInCurrentCurrency.toFixed(2);
+} else {
+  betInput.value = '0.00';
+  showNotification('Недостаточно средств на балансе');
+}
 }
 
 // Функции чата поддержки
@@ -5787,7 +5986,7 @@ document.getElementById('welcomeImageOverlay').classList.add('hidden');
 function claimWelcomeBonus() {
 closeWelcomeImage();
 closeBonusesModal();
-openForm('depositOverlay');
+showDepositBonusModal();
 }
 
 function showNotification(message = 'Скоро будет') {
