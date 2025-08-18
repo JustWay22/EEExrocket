@@ -429,7 +429,7 @@ width: 100%;
 height: 100%;
 background: #000;
 opacity: 0;
-z-index: 50;
+z-index: 5;
 pointer-events: none;
 transition: opacity 0.5s ease;
 border-radius: 25px;
@@ -1258,6 +1258,7 @@ overflow: hidden;
 display: flex;
 flex-direction: column;
 gap: 10px;
+z-index: 100;
 }
 
 .players-container {
@@ -1380,6 +1381,7 @@ display: grid;
 grid-template-columns: 1fr 300px;
 gap: 30px;
 min-height: 600px;
+z-index: 100;
 }
 
 .game-section {
@@ -1409,7 +1411,7 @@ padding: 8px 15px;
 box-shadow: 0 3px 10px rgba(0, 0, 0, 0.3);
 border: 1px solid var(--border-color);
 backdrop-filter: blur(5px);
-z-index: 10;
+z-index: 100;
 }
 
 .in-game-history-title {
@@ -1471,7 +1473,7 @@ position: relative;
 
 .multiplier-container {
 text-align: center;
-z-index: 15;
+z-index: 100;
 position: relative;
 }
 
@@ -1494,7 +1496,7 @@ min-width: 180px;
 box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
 display: inline-block;
 position: relative;
-z-index: 15;
+z-index: 100;
 }
 
 .rocket-container {
@@ -1562,7 +1564,7 @@ box-shadow: 0 0 10px rgba(255, 215, 0, 0.5);
 display: grid;
 grid-template-columns: 1fr 1fr;
 gap: 20px;
-z-index: 15;
+z-index: 100;
 position: relative;
 }
 
@@ -1574,7 +1576,7 @@ box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
 border: 1px solid var(--border-color);
 text-align: center;
 position: relative;
-z-index: 15;
+z-index: 100;
 }
 
 .bet-label {
@@ -1591,7 +1593,7 @@ display: inline-block;
 width: 100%;
 max-width: 200px;
 margin-bottom: 15px;
-z-index: 15;
+z-index: 100;
 }
 
 .bet-input {
@@ -1606,7 +1608,7 @@ text-align: center;
 outline: none;
 transition: all 0.3s ease;
 position: relative;
-z-index: 15;
+z-index: 100;
 min-height: 44px;
 }
 
@@ -1620,7 +1622,7 @@ display: flex;
 justify-content: center;
 gap: 6px;
 margin-bottom: 15px;
-z-index: 15;
+z-index: 100;
 position: relative;
 }
 
@@ -1635,7 +1637,7 @@ font-weight: bold;
 cursor: pointer;
 transition: all 0.3s ease;
 position: relative;
-z-index: 15;
+z-index: 100;
 min-height: 44px;
 }
 
@@ -1652,7 +1654,7 @@ align-items: center;
 justify-content: center;
 gap: 10px;
 margin-bottom: 15px;
-z-index: 15;
+z-index: 100;
 position: relative;
 }
 
@@ -1671,7 +1673,7 @@ border-radius: 12px;
 cursor: pointer;
 transition: all 0.3s ease;
 border: 2px solid #555;
-z-index: 15;
+z-index: 100;
 }
 
 .toggle-switch.active {
@@ -1708,7 +1710,7 @@ width: 60px;
 text-align: center;
 outline: none;
 transition: all 0.3s ease;
-z-index: 15;
+z-index: 100;
 position: relative;
 min-height: 44px;
 }
@@ -1738,7 +1740,7 @@ box-shadow: 0 0 10px rgba(255, 215, 0, 0.5);
 display: flex;
 flex-direction: column;
 gap: 10px;
-z-index: 15;
+z-index: 100;
 position: relative;
 }
 
@@ -1757,7 +1759,7 @@ display: flex;
 flex-direction: column;
 align-items: center;
 justify-content: center;
-z-index: 15;
+z-index: 100;
 }
 
 .bet-btn {
@@ -1806,7 +1808,7 @@ position: absolute;
 bottom: 5px;
 left: 50%;
 transform: translateX(-50%);
-z-index: 15;
+z-index: 100;
 }
 
 /* CSS Ракета */
@@ -2552,6 +2554,7 @@ border: 1px solid var(--border-color);
 display: flex;
 flex-direction: column;
 gap: 20px;
+z-index: 100;
 }
 
 .bonus-panel-title {
@@ -2965,6 +2968,7 @@ display: grid;
 grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
 gap: 30px;
 align-items: center;
+z-index: 100;
 }
 
 .stat-item {
@@ -3300,7 +3304,7 @@ background: rgba(0, 0, 0, 0.7);
 display: flex;
 justify-content: center;
 align-items: center;
-z-index: 100;
+z-index: 2000;
 opacity: 0;
 visibility: hidden;
 transition: all 0.3s ease;
@@ -5067,8 +5071,8 @@ to {
       <div class="rocket-container">
         <!-- Контейнер заправки -->
         <div class="refueling-container" id="refueling-container">
-          <img src="https://cdn-icons-png.flaticon.com/512/944/944047.png" alt="Rocket" class="refueling-rocket-icon">
-          <div class="refueling-text">Заправляем ракету</div>
+          <img src="https://i.postimg.cc/7LnZHZFS/2025-08-14-024749-Photoroom.png" alt="Rocket" class="refueling-rocket-icon">
+          <div class="refueling-text">Заправляем шатл</div>
           <div class="progress-bar-container">
             <div class="progress-bar" id="progress-bar"></div>
           </div>
