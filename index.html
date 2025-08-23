@@ -26,14 +26,10 @@ color: white;
 }
 
 .loading-logo {
-font-size: 4rem;
-font-weight: bold;
+width: 150px;
+height: 150px;
 margin-bottom: 2rem;
-text-shadow: 0 0 20px rgba(255, 215, 0, 0.5);
-}
-
-.loading-logo .logo-x {
-color: #ff8c00;
+background: url('https://i.postimg.cc/fy0njhGK/fsdecdvfc.png') center/contain no-repeat;
 }
 
 .loading-rocket {
@@ -78,26 +74,6 @@ font-size: 1rem;
 color: #aaa;
 text-align: center;
 }
-
-.loading-stars {
-position: absolute;
-top: 0;
-left: 0;
-width: 100%;
-height: 100%;
-pointer-events: none;
-}
-
-.loading-star {
-position: absolute;
-background: white;
-border-radius: 50%;
-animation: twinkle 3s infinite;
-}
-
-.loading-star.small { width: 2px; height: 2px; }
-.loading-star.medium { width: 3px; height: 3px; }
-.loading-star.large { width: 4px; height: 4px; }
 
 :root {
 --bg-primary: #1a1a1a;
@@ -288,7 +264,7 @@ opacity: 0.7;
 100% { transform: rotate(360deg); }
 }
 
-/* ОБНОВЛЕННАЯ АНИМАЦИЯ КОМЕТ - ПОЛЕТ ПОД НАКЛОНОМ ВНИЗ БЕЗ ВРАЩЕНИЯ */
+/* АНИМАЦИЯ КОМЕТ - ПОЛЕТ ПОД НАКЛОНОМ ВНИЗ БЕЗ ВРАЩЕНИЯ */
 .comet {
 position: absolute;
 width: 60px;
@@ -418,25 +394,6 @@ animation: forestMoveDown 2s ease-out forwards;
   transform: translateY(200px); 
   opacity: 0;
 }
-}
-
-/* ЧЕРНЫЙ ФРОНТ ПРИ ВЗРЫВЕ - ТОЛЬКО ДЛЯ ИГРОВОЙ ОБЛАСТИ */
-.game-explosion-overlay {
-position: absolute;
-top: 0;
-left: 0;
-width: 100%;
-height: 100%;
-background: #000;
-opacity: 0;
-z-index: 5;
-pointer-events: none;
-transition: opacity 0.5s ease;
-border-radius: 25px;
-}
-
-.game-explosion-overlay.active {
-opacity: 0.8;
 }
 
 /* МОБИЛЬНАЯ КНОПКА ГАМБУРГЕР */
@@ -996,16 +953,9 @@ display: flex;
 align-items: center;
 font-size: 28px;
 font-weight: bold;
-}
-
-.logo-x {
-color: var(--accent-orange);
-font-size: 32px;
-}
-
-.logo-rocket {
-color: var(--text-primary);
-font-size: 28px;
+width: 60px;
+height: 60px;
+background: url('https://i.postimg.cc/fy0njhGK/fsdecdvfc.png') center/contain no-repeat;
 }
 
 .top-right-section {
@@ -1848,12 +1798,27 @@ animation: vibrationActive 0.15s infinite;
 animation: rocketLaunch 2s ease-out forwards;
 }
 
+.scene.flying-away {
+animation: rocketFlyAway 3s ease-in forwards;
+}
+
 @keyframes rocketLaunch {
 0% {
   transform: rotate(45deg) translate(150px, 150px) scale(0.5);
 }
 100% {
   transform: rotate(45deg) translate(0px, 0px) scale(1);
+}
+}
+
+@keyframes rocketFlyAway {
+0% {
+  transform: rotate(45deg) translate(0px, 0px) scale(1);
+  opacity: 1;
+}
+100% {
+  transform: rotate(45deg) translate(-500px, -500px) scale(0.1);
+  opacity: 0;
 }
 }
 
@@ -2503,25 +2468,6 @@ animation: activeFire 0.2s infinite alternate;
 }
 }
 
-/* ВЗРЫВ НА ЗАДНЕМ ПЛАНЕ - УМЕНЬШЕН В 1.5 РАЗА И СКРУГЛЕН */
-.explosion {
-position: absolute;
-top: 50%;
-left: 50%;
-transform: translate(-50%, -50%);
-z-index: 2;
-border-radius: 50px;
-overflow: hidden;
-opacity: 0.8;
-}
-
-.explosion img {
-width: 793px;
-height: 793px;
-object-fit: contain;
-border-radius: 50px;
-}
-
 .win-animation {
 position: absolute;
 top: 50%;
@@ -3024,6 +2970,60 @@ letter-spacing: 1px;
 font-size: 20px;
 font-weight: bold;
 color: var(--accent-color);
+}
+
+/* НОВАЯ СЕКЦИЯ С ТРЕМЯ КОЛОНКАМИ ПОД ИГРОЙ */
+.bottom-menu-section {
+margin: 30px auto;
+width: 100%;
+max-width: 1200px;
+background: var(--bg-panel);
+border-radius: 20px;
+padding: 0;
+box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+border: 2px solid var(--border-color);
+display: grid;
+grid-template-columns: repeat(3, 1fr);
+z-index: 100;
+overflow: hidden;
+}
+
+.menu-column {
+padding: 30px;
+text-align: center;
+cursor: pointer;
+transition: all 0.3s ease;
+position: relative;
+border-right: 1px solid var(--border-color);
+}
+
+.menu-column:last-child {
+border-right: none;
+}
+
+.menu-column:hover {
+background: rgba(255, 255, 255, 0.05);
+transform: translateY(-2px);
+}
+
+.menu-column-icon {
+font-size: 48px;
+margin-bottom: 20px;
+color: var(--accent-color);
+}
+
+.menu-column-title {
+font-size: 24px;
+font-weight: bold;
+color: var(--text-primary);
+margin-bottom: 15px;
+text-transform: uppercase;
+}
+
+.menu-column-description {
+font-size: 14px;
+color: var(--text-secondary);
+line-height: 1.6;
 }
 
 /* Приветственное окно с картинкой */
@@ -3957,6 +3957,20 @@ to {
   grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
   gap: 20px;
 }
+
+.bottom-menu-section {
+  grid-template-columns: 1fr;
+  gap: 0;
+}
+
+.menu-column {
+  border-right: none;
+  border-bottom: 1px solid var(--border-color);
+}
+
+.menu-column:last-child {
+  border-bottom: none;
+}
 }
 
 @media (max-width: 992px) {
@@ -4017,6 +4031,11 @@ to {
   gap: 15px;
 }
 
+.bottom-menu-section {
+  margin: 20px 15px;
+  width: calc(100% - 30px);
+}
+
 .support-chat {
   width: 300px;
   height: 400px;
@@ -4053,11 +4072,6 @@ to {
   min-width: 140px;
 }
 
-.explosion img {
-  width: 500px;
-  height: 500px;
-}
-
 .slots-grid {
   grid-template-columns: 1fr;
   gap: 20px;
@@ -4079,7 +4093,9 @@ to {
 }
 
 .loading-logo {
-  font-size: 3rem;
+  width: 120px;
+  height: 120px;
+  margin-bottom: 1.5rem;
 }
 
 .loading-progress {
@@ -4105,15 +4121,17 @@ to {
 }
 
 .top-logo {
-  font-size: 24px;
+  width: 50px;
+  height: 50px;
 }
 
-.logo-x {
-  font-size: 28px;
+.theme-switcher {
+  gap: 8px;
 }
 
-.logo-rocket {
-  font-size: 24px;
+.theme-btn {
+  width: 25px;
+  height: 25px;
 }
 
 .top-balance-section {
@@ -4349,6 +4367,29 @@ to {
   font-size: 16px;
 }
 
+.bottom-menu-section {
+  margin: 20px 10px;
+  width: calc(100% - 20px);
+}
+
+.menu-column {
+  padding: 20px;
+}
+
+.menu-column-icon {
+  font-size: 36px;
+  margin-bottom: 15px;
+}
+
+.menu-column-title {
+  font-size: 20px;
+  margin-bottom: 10px;
+}
+
+.menu-column-description {
+  font-size: 12px;
+}
+
 .support-chat {
   width: 280px;
   height: 350px;
@@ -4470,11 +4511,6 @@ to {
   min-height: 48px;
 }
 
-.explosion img {
-  width: 400px;
-  height: 400px;
-}
-
 .welcome-image-overlay {
   padding: 20px;
 }
@@ -4585,7 +4621,9 @@ to {
 
 @media (max-width: 480px) {
 .loading-logo {
-  font-size: 2.5rem;
+  width: 100px;
+  height: 100px;
+  margin-bottom: 1rem;
 }
 
 .loading-progress {
@@ -4699,15 +4737,8 @@ to {
 }
 
 .top-logo {
-  font-size: 20px;
-}
-
-.logo-x {
-  font-size: 24px;
-}
-
-.logo-rocket {
-  font-size: 20px;
+  width: 45px;
+  height: 45px;
 }
 
 .theme-switcher {
@@ -4858,6 +4889,29 @@ to {
   font-size: 16px;
 }
 
+.bottom-menu-section {
+  margin: 15px 5px;
+  width: calc(100% - 10px);
+}
+
+.menu-column {
+  padding: 15px;
+}
+
+.menu-column-icon {
+  font-size: 32px;
+  margin-bottom: 12px;
+}
+
+.menu-column-title {
+  font-size: 18px;
+  margin-bottom: 8px;
+}
+
+.menu-column-description {
+  font-size: 11px;
+}
+
 .support-chat {
   width: 250px;
   height: 300px;
@@ -4897,11 +4951,6 @@ to {
   width: 30px;
   height: 30px;
   font-size: 14px;
-}
-
-.explosion img {
-  width: 300px;
-  height: 300px;
 }
 
 .notification-overlay {
@@ -4972,8 +5021,9 @@ to {
 /* ДОПОЛНИТЕЛЬНЫЕ СТИЛИ ДЛЯ ОЧЕНЬ МАЛЕНЬКИХ ЭКРАНОВ */
 @media (max-width: 360px) {
 .loading-logo {
-  font-size: 2rem;
-  margin-bottom: 1.5rem;
+  width: 80px;
+  height: 80px;
+  margin-bottom: 1rem;
 }
 
 .loading-progress {
@@ -5018,11 +5068,6 @@ to {
   height: 120px;
 }
 
-.explosion img {
-  width: 250px;
-  height: 250px;
-}
-
 .support-chat {
   width: 220px;
   height: 280px;
@@ -5036,6 +5081,24 @@ to {
   width: 25px;
   height: 25px;
   font-size: 12px;
+}
+
+.menu-column {
+  padding: 12px;
+}
+
+.menu-column-icon {
+  font-size: 28px;
+  margin-bottom: 10px;
+}
+
+.menu-column-title {
+  font-size: 16px;
+  margin-bottom: 6px;
+}
+
+.menu-column-description {
+  font-size: 10px;
 }
 
 .slots-modal-title {
@@ -5075,10 +5138,7 @@ to {
 
 <!-- Экран загрузки -->
 <div class="loading-screen" id="loadingScreen">
-<div class="loading-stars" id="loadingStars"></div>
-<div class="loading-logo">
-  <span class="logo-x">X</span>Rocket
-</div>
+<div class="loading-logo"></div>
 <div class="loading-rocket">🚀</div>
 <div class="loading-progress">
   <div class="loading-progress-bar" id="loadingProgressBar"></div>
@@ -5431,9 +5491,7 @@ to {
 <div class="top-header">
 <!-- Левая часть -->
 <div class="top-left-section">
-  <div class="top-logo">
-    <span class="logo-x">X</span><span class="logo-rocket">Rocket</span>
-  </div>
+  <div class="top-logo"></div>
 
   <div class="theme-switcher">
     <button class="theme-btn black active" onclick="changeTheme('black')" title="Черная тема"></button>
@@ -5519,9 +5577,6 @@ to {
     <div class="starfield">
       <!-- Звезды будут добавлены динамически -->
     </div>
-
-    <!-- ЧЕРНЫЙ OVERLAY ПРИ ВЗРЫВЕ - ТОЛЬКО ДЛЯ ИГРОВОЙ ОБЛАСТИ -->
-    <div class="game-explosion-overlay" id="gameExplosionOverlay"></div>
 
     <!-- Космические объекты -->
     <div class="space-object game-moon" id="gameMoon"></div>
@@ -5759,6 +5814,33 @@ to {
 </div>
 </div>
 
+<!-- НОВАЯ СЕКЦИЯ С ТРЕМЯ КОЛОНКАМИ ПОД ИГРОЙ -->
+<div class="bottom-menu-section">
+<div class="menu-column" onclick="selectGame('crash')">
+  <div class="menu-column-icon">🎮</div>
+  <div class="menu-column-title">ИГРЫ</div>
+  <div class="menu-column-description">
+    Играйте в увлекательные игры и выигрывайте крупные призы. Краш, слоты, минер и многое другое!
+  </div>
+</div>
+
+<div class="menu-column" onclick="openBonusesModal()">
+  <div class="menu-column-icon">🎁</div>
+  <div class="menu-column-title">БОНУСЫ</div>
+  <div class="menu-column-description">
+    Получайте ежедневные бонусы, участвуйте в акциях и крутите колесо фортуны для дополнительных призов!
+  </div>
+</div>
+
+<div class="menu-column" onclick="buyVip()">
+  <div class="menu-column-icon">👑</div>
+  <div class="menu-column-title">VIP CLUB</div>
+  <div class="menu-column-description">
+    Станьте VIP игроком и получите эксклюзивные бонусы, персонального менеджера и особые условия!
+  </div>
+</div>
+</div>
+
 <!-- Чат поддержки -->
 <button class="support-chat-toggle" id="supportChatToggle" onclick="toggleSupportChat()">💬</button>
 <div class="support-chat" id="supportChat">
@@ -5842,8 +5924,6 @@ let refuelingProgress = 0;
 let refuelingInterval;
 let playerAddInterval;
 let multiplierSpeed = 0.01;
-let explosionElement = null;
-let wheelLastSpin = 0;
 let isVip = false;
 let gamesSectionExpanded = true;
 let currentSpaceObject = 0;
@@ -5945,7 +6025,6 @@ const cssRocketScene = document.getElementById('cssRocketScene');
 const sidebarUserName = document.getElementById('sidebarUserName');
 const sidebarUserId = document.getElementById('sidebarUserId');
 const cometsContainer = document.getElementById('cometsContainer');
-const gameExplosionOverlay = document.getElementById('gameExplosionOverlay');
 const leftSidebar = document.getElementById('leftSidebar');
 const mobileMenuToggle = document.getElementById('mobileMenuToggle');
 
@@ -6191,25 +6270,7 @@ openForm('depositOverlay');
 }
 
 // Функции загрузки
-function createLoadingStars() {
-const loadingStars = document.getElementById('loadingStars');
-for (let i = 0; i < 100; i++) {
-  const star = document.createElement('div');
-  star.className = 'loading-star';
-  
-  const sizes = ['small', 'medium', 'large'];
-  star.classList.add(sizes[Math.floor(Math.random() * sizes.length)]);
-  
-  star.style.left = Math.random() * 100 + '%';
-  star.style.top = Math.random() * 100 + '%';
-  star.style.animationDelay = Math.random() * 3 + 's';
-  
-  loadingStars.appendChild(star);
-}
-}
-
 function startLoading() {
-createLoadingStars();
 let progress = 0;
 const progressBar = document.getElementById('loadingProgressBar');
 const progressText = document.getElementById('loadingText');
@@ -6811,10 +6872,8 @@ document.getElementById('rocket-stub').style.display = 'block';
 cssRocketContainer.style.display = 'none';
 document.getElementById('rocket-3d-wrapper').style.display = 'none';
 refuelingContainer.style.display = 'none';
-hideExplosion();
-hideGameExplosionOverlay();
 rocketStub.classList.remove('active');
-cssRocketScene.classList.remove('game-active', 'launching');
+cssRocketScene.classList.remove('game-active', 'launching', 'flying-away');
 }
 
 function showCSSRocket() {
@@ -6822,8 +6881,6 @@ document.getElementById('rocket-stub').style.display = 'none';
 cssRocketContainer.style.display = 'flex';
 document.getElementById('rocket-3d-wrapper').style.display = 'none';
 refuelingContainer.style.display = 'none';
-hideExplosion();
-hideGameExplosionOverlay();
 }
 
 function showRocket3D() {
@@ -6831,8 +6888,8 @@ document.getElementById('rocket-stub').style.display = 'none';
 cssRocketContainer.style.display = 'none';
 document.getElementById('rocket-3d-wrapper').style.display = 'block';
 refuelingContainer.style.display = 'none';
-hideExplosion();
-hideGameExplosionOverlay();
+rocketStub.classList.remove('active');
+cssRocketScene.classList.remove('game-active', 'launching', 'flying-away');
 }
 
 function showRefueling() {
@@ -6840,45 +6897,15 @@ document.getElementById('rocket-stub').style.display = 'none';
 cssRocketContainer.style.display = 'none';
 document.getElementById('rocket-3d-wrapper').style.display = 'none';
 refuelingContainer.style.display = 'flex';
-hideExplosion();
-hideGameExplosionOverlay();
 rocketStub.classList.remove('active');
+cssRocketScene.classList.remove('game-active', 'launching', 'flying-away');
+}
+
+// НОВАЯ ФУНКЦИЯ ДЛЯ АНИМАЦИИ УЛЕТАЮЩЕЙ РАКЕТЫ
+function showRocketFlyingAway() {
+showCSSRocket();
 cssRocketScene.classList.remove('game-active', 'launching');
-}
-
-// ВЗРЫВ НА ЗАДНЕМ ПЛАНЕ
-function showExplosion() {
-hideExplosion();
-const rocketContainer = document.querySelector('.rocket-container');
-explosionElement = document.createElement('div');
-explosionElement.className = 'explosion';
-explosionElement.innerHTML = '<img src="https://i.postimg.cc/9f1zVsT4/1.gif" alt="Explosion">';
-rocketContainer.appendChild(explosionElement);
-document.getElementById('rocket-stub').style.display = 'none';
-cssRocketContainer.style.display = 'none';
-document.getElementById('rocket-3d-wrapper').style.display = 'none';
-refuelingContainer.style.display = 'none';
-rocketStub.classList.remove('active');
-cssRocketScene.classList.remove('game-active', 'launching');
-
-// ПОКАЗЫВАЕМ ЧЕРНЫЙ OVERLAY ДЛЯ ИГРОВОЙ ОБЛАСТИ
-showGameExplosionOverlay();
-}
-
-function hideExplosion() {
-if (explosionElement) {
-  explosionElement.remove();
-  explosionElement = null;
-}
-}
-
-// ФУНКЦИИ ДЛЯ ЧЕРНОГО OVERLAY ПРИ ВЗРЫВЕ
-function showGameExplosionOverlay() {
-gameExplosionOverlay.classList.add('active');
-}
-
-function hideGameExplosionOverlay() {
-gameExplosionOverlay.classList.remove('active');
+cssRocketScene.classList.add('flying-away');
 }
 
 function showWinAnimation(winAmount) {
@@ -7087,12 +7114,15 @@ setTimeout(() => {
 }, 2000);
 }
 
-function endGame(crashed, finalMultiplier) {
+// ОБНОВЛЕННАЯ ФУНКЦИЯ ОКОНЧАНИЯ ИГРЫ - РАКЕТА УЛЕТАЕТ ВМЕСТО ВЗРЫВА
+function endGame(rocketFliesAway, finalMultiplier) {
 clearInterval(gameInterval);
 gameActive = false;
 cssRocketScene.classList.remove('game-active', 'launching');
-if (crashed) {
-  showExplosion();
+
+if (rocketFliesAway) {
+  // Показываем анимацию улетающей ракеты
+  showRocketFlyingAway();
 }
 
 players.forEach(player => {
@@ -7111,17 +7141,17 @@ if (isLoggedIn && userBetsHistory.length > 0) {
   }
 }
 
-if (crashed) {
-  multiplierEl.textContent = 'Ракета взорвалась!';
-  multiplierEl.style.color = '#ff4444';
+if (rocketFliesAway) {
+  multiplierEl.textContent = 'Ракета улетела!';
+  multiplierEl.style.color = '#ff8c00';
   multiplierEl.style.fontSize = '32px';
   
   // Проверяем, забрал ли игрок хотя бы одну ставку
   const anyWinTaken = betsData[1].playerTookWin || betsData[2].playerTookWin;
   if (anyWinTaken) {
-    gameStatus.textContent = 'Ракета взорвалась, но вы успели забрать выигрыш!';
+    gameStatus.textContent = 'Ракета улетела, но вы успели забрать выигрыш!';
   } else {
-    gameStatus.textContent = 'Ракета взорвалась!';
+    gameStatus.textContent = 'Ракета улетела за пределы экрана!';
   }
 } else {
   gameStatus.textContent = 'Ракета улетела!';
@@ -7135,7 +7165,6 @@ for (let betNum = 1; betNum <= 2; betNum++) {
 setTimeout(() => {
   multiplierEl.style.color = 'var(--accent-color)';
   multiplierEl.style.fontSize = '48px';
-  hideGameExplosionOverlay();
   waitForBet();
 }, 3000);
 }
@@ -7387,6 +7416,9 @@ const currentWithdrawn = parseInt(withdrawnToday.textContent.replace(/[$,]/g, ''
 const newWithdrawn = currentWithdrawn + Math.floor(Math.random() * 1000);
 withdrawnToday.textContent = `$${newWithdrawn.toLocaleString()}`;
 }
+
+// ПЕРЕМЕННАЯ ДЛЯ ОТСЛЕЖИВАНИЯ ПОСЛЕДНЕГО СПИНА КОЛЕСА
+let wheelLastSpin = 0;
 
 // Инициализация
 document.addEventListener('DOMContentLoaded', () => {
