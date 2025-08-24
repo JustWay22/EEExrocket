@@ -75,6 +75,43 @@ color: #aaa;
 text-align: center;
 }
 
+/* Кнопка переключения языка - ПЕРЕНЕСЕНА В ЛЕВЫЙ НИЖНИЙ УГОЛ */
+.language-switcher {
+position: fixed;
+bottom: 15px;
+left: 15px;
+z-index: 1002;
+display: flex;
+gap: 5px;
+}
+
+.language-btn {
+background: linear-gradient(135deg, var(--accent-color), var(--accent-orange));
+border: 2px solid transparent;
+border-radius: 8px;
+color: #000;
+width: 45px;
+height: 30px;
+font-size: 12px;
+font-weight: bold;
+cursor: pointer;
+transition: all 0.3s ease;
+display: flex;
+align-items: center;
+justify-content: center;
+box-shadow: 0 2px 8px rgba(255, 215, 0, 0.4);
+}
+
+.language-btn:hover {
+transform: scale(1.05);
+box-shadow: 0 4px 12px rgba(255, 215, 0, 0.6);
+}
+
+.language-btn.active {
+border-color: #fff;
+box-shadow: 0 4px 15px rgba(255, 215, 0, 0.8);
+}
+
 :root {
 --bg-primary: #1a1a1a;
 --bg-secondary: #2d1a00;
@@ -877,6 +914,7 @@ transition: all 0.3s ease;
 text-decoration: none;
 font-size: 20px;
 position: relative;
+overflow: hidden;
 }
 
 .social-link.instagram {
@@ -889,12 +927,10 @@ background: #0088cc;
 color: white;
 }
 
-.social-link.six-app {
-background: #333;
+.social-link.threads {
+background: #000;
 color: white;
-border: 1px solid #555;
-font-size: 16px;
-font-weight: bold;
+border: 1px solid #333;
 }
 
 .social-link.more {
@@ -907,6 +943,14 @@ font-size: 14px;
 .social-link:hover {
 transform: translateY(-2px) scale(1.05);
 box-shadow: 0 6px 20px rgba(0, 0, 0, 0.4);
+}
+
+/* Стили для изображений в социальных ссылках */
+.social-link img {
+width: 30px;
+height: 30px;
+object-fit: contain;
+border-radius: 4px;
 }
 
 .sidebar-support {
@@ -4175,6 +4219,121 @@ min-height: 50px;
 border-color: #2575fc;
 }
 
+/* НОВЫЕ СЕКЦИИ ОПЛАТЫ */
+.payment-section {
+margin-bottom: 20px;
+padding: 20px;
+background: var(--bg-card);
+border-radius: 15px;
+border: 2px solid var(--border-color);
+}
+
+.payment-section-title {
+font-size: 18px;
+font-weight: bold;
+color: var(--accent-color);
+margin-bottom: 15px;
+text-align: center;
+text-transform: uppercase;
+}
+
+.crypto-payment-options {
+display: grid;
+grid-template-columns: 1fr 1fr;
+gap: 15px;
+margin-bottom: 20px;
+}
+
+.crypto-option {
+background: var(--bg-panel);
+border: 2px solid var(--border-color);
+border-radius: 12px;
+padding: 15px;
+text-align: center;
+cursor: pointer;
+transition: all 0.3s ease;
+}
+
+.crypto-option:hover {
+border-color: var(--accent-color);
+transform: translateY(-2px);
+box-shadow: 0 4px 15px rgba(255, 215, 0, 0.3);
+}
+
+.crypto-option-icon {
+font-size: 32px;
+margin-bottom: 10px;
+}
+
+.crypto-option-name {
+font-size: 14px;
+font-weight: bold;
+color: var(--text-primary);
+margin-bottom: 5px;
+}
+
+.crypto-option-desc {
+font-size: 12px;
+color: var(--text-secondary);
+}
+
+.card-transfer-section {
+background: var(--bg-card);
+border: 2px solid var(--border-color);
+border-radius: 15px;
+padding: 20px;
+margin-bottom: 20px;
+}
+
+.card-transfer-title {
+font-size: 16px;
+font-weight: bold;
+color: var(--accent-color);
+margin-bottom: 15px;
+text-align: center;
+}
+
+.card-input-group {
+display: grid;
+grid-template-columns: 1fr 1fr;
+gap: 10px;
+margin-bottom: 15px;
+}
+
+.card-input {
+background: var(--bg-panel);
+border: 2px solid var(--border-color);
+border-radius: 8px;
+color: var(--text-primary);
+font-size: 14px;
+padding: 10px;
+outline: none;
+transition: all 0.3s ease;
+}
+
+.card-input:focus {
+border-color: var(--accent-color);
+}
+
+.transfer-btn {
+background: linear-gradient(135deg, #2196f3, #03a9f4);
+border: none;
+border-radius: 10px;
+color: white;
+padding: 12px 20px;
+font-size: 14px;
+font-weight: bold;
+cursor: pointer;
+transition: all 0.3s ease;
+width: 100%;
+min-height: 45px;
+}
+
+.transfer-btn:hover {
+transform: translateY(-2px);
+box-shadow: 0 4px 15px rgba(33, 150, 243, 0.4);
+}
+
 .cryptopay-section {
 margin-bottom: 20px;
 text-align: center;
@@ -4247,6 +4406,94 @@ transition: background 0.3s;
 
 .close-btn:hover {
 background: rgba(255, 255, 255, 0.1);
+}
+
+/* НОВЫЕ СТИЛИ ДЛЯ СИСТЕМЫ ПРОВЕРКИ ПЛАТЕЖЕЙ */
+.payment-details {
+background: var(--bg-panel);
+border: 2px solid var(--accent-color);
+border-radius: 12px;
+padding: 20px;
+margin-bottom: 20px;
+text-align: center;
+}
+
+.payment-details-title {
+font-size: 20px;
+font-weight: bold;
+color: var(--accent-color);
+margin-bottom: 15px;
+}
+
+.payment-card-info {
+background: rgba(255, 215, 0, 0.1);
+border: 2px solid var(--accent-color);
+border-radius: 10px;
+padding: 15px;
+margin-bottom: 15px;
+font-family: monospace;
+font-size: 16px;
+word-break: break-all;
+color: var(--accent-color);
+}
+
+.payment-amount-info {
+background: rgba(76, 175, 80, 0.1);
+border: 2px solid #4caf50;
+border-radius: 10px;
+padding: 15px;
+margin-bottom: 20px;
+text-align: center;
+}
+
+.payment-amount-label {
+font-size: 14px;
+color: var(--text-secondary);
+margin-bottom: 5px;
+}
+
+.payment-amount-value {
+font-size: 24px;
+font-weight: bold;
+color: #4caf50;
+}
+
+.check-payment-btn {
+background: linear-gradient(135deg, #2196f3, #03a9f4);
+border: none;
+border-radius: 12px;
+color: white;
+padding: 15px 30px;
+font-size: 16px;
+font-weight: bold;
+cursor: pointer;
+transition: all 0.3s ease;
+width: 100%;
+min-height: 50px;
+box-shadow: 0 4px 15px rgba(33, 150, 243, 0.4);
+}
+
+.check-payment-btn:hover {
+transform: translateY(-2px);
+box-shadow: 0 6px 20px rgba(33, 150, 243, 0.6);
+}
+
+.check-payment-btn:disabled {
+background: #666;
+cursor: not-allowed;
+transform: none;
+box-shadow: none;
+}
+
+.payment-attempts {
+background: rgba(255, 152, 0, 0.1);
+border: 1px solid #ff9800;
+border-radius: 8px;
+padding: 10px;
+margin-bottom: 15px;
+text-align: center;
+font-size: 14px;
+color: #ff9800;
 }
 
 /* МОДАЛЬНЫЕ ОКНА ДЛЯ МИНЕРА И БОНУСОВ */
@@ -4537,6 +4784,11 @@ to {
   padding: 0 15px;
 }
 
+/* ПЕРЕМЕЩЕНИЕ КНОПКИ ЯЗЫКА ПРИ МОБИЛЬНОМ МЕНЮ */
+.language-switcher {
+  bottom: 80px; /* Поднимаем выше чтобы не перекрывалась с кнопкой гамбургер */
+}
+
 .main-container {
   flex-direction: column;
   align-items: center;
@@ -4666,6 +4918,19 @@ to {
 
 .loading-text {
   font-size: 1.2rem;
+}
+
+.language-switcher {
+  bottom: 70px; /* Еще выше для небольших экранов */
+  left: 10px;
+  flex-direction: column;
+  gap: 3px;
+}
+
+.language-btn {
+  width: 40px;
+  height: 25px;
+  font-size: 10px;
 }
 
 .top-header {
@@ -5170,6 +5435,25 @@ to {
   height: 35px;
   font-size: 16px;
 }
+
+.check-payment-btn {
+  font-size: 14px;
+  padding: 12px 20px;
+  min-height: 48px;
+}
+
+.payment-details-title {
+  font-size: 18px;
+}
+
+.payment-card-info {
+  font-size: 14px;
+  padding: 12px;
+}
+
+.payment-amount-value {
+  font-size: 20px;
+}
 }
 
 @media (max-width: 480px) {
@@ -5187,6 +5471,17 @@ to {
   width: 40px;
   height: 40px;
   font-size: 16px;
+}
+
+.language-switcher {
+  gap: 2px;
+  bottom: 60px;
+}
+
+.language-btn {
+  width: 35px;
+  height: 20px;
+  font-size: 9px;
 }
 
 .left-sidebar {
@@ -5273,6 +5568,11 @@ to {
   width: 40px;
   height: 40px;
   font-size: 16px;
+}
+
+.social-link img {
+  width: 25px;
+  height: 25px;
 }
 
 .sidebar-support {
@@ -5576,6 +5876,25 @@ to {
   height: 30px;
   font-size: 14px;
 }
+
+.check-payment-btn {
+  font-size: 12px;
+  padding: 10px 15px;
+  min-height: 44px;
+}
+
+.payment-details-title {
+  font-size: 16px;
+}
+
+.payment-card-info {
+  font-size: 12px;
+  padding: 10px;
+}
+
+.payment-amount-value {
+  font-size: 18px;
+}
 }
 
 /* ДОПОЛНИТЕЛЬНЫЕ СТИЛИ ДЛЯ ОЧЕНЬ МАЛЕНЬКИХ ЭКРАНОВ */
@@ -5594,6 +5913,12 @@ to {
   width: 36px;
   height: 36px;
   font-size: 14px;
+}
+
+.language-btn {
+  width: 30px;
+  height: 18px;
+  font-size: 8px;
 }
 
 .left-sidebar {
@@ -5687,6 +6012,25 @@ to {
   height: 25px;
   font-size: 12px;
 }
+
+.check-payment-btn {
+  font-size: 11px;
+  padding: 8px 12px;
+  min-height: 40px;
+}
+
+.payment-details-title {
+  font-size: 14px;
+}
+
+.payment-card-info {
+  font-size: 11px;
+  padding: 8px;
+}
+
+.payment-amount-value {
+  font-size: 16px;
+}
 }
 </style>
 </head>
@@ -5705,7 +6049,13 @@ to {
   <div class="loading-progress-bar" id="loadingProgressBar"></div>
 </div>
 <div class="loading-text" id="loadingText">0%</div>
-<div class="loading-subtext">Загружаем игру...</div>
+<div class="loading-subtext" data-translate="loading">Загружаем игру...</div>
+</div>
+
+<!-- Переключатель языков - ПЕРЕНЕСЕН В ЛЕВЫЙ НИЖНИЙ УГОЛ -->
+<div class="language-switcher">
+<button class="language-btn active" onclick="changeLanguage('ru')" id="langRu">RU</button>
+<button class="language-btn" onclick="changeLanguage('en')" id="langEn">EN</button>
 </div>
 
 <!-- МОБИЛЬНАЯ КНОПКА МЕНЮ -->
@@ -5720,7 +6070,7 @@ to {
   
   <div class="user-avatar">И</div>
   <div class="user-info">
-    <div class="user-name" id="sidebarUserName">ИГРОК</div>
+    <div class="user-name" id="sidebarUserName" data-translate="player">ИГРОК</div>
     <div class="user-id" id="sidebarUserId">ID 327502910</div>
   </div>
   <div class="user-next-arrow">›</div>
@@ -5729,7 +6079,7 @@ to {
 <!-- Секция бонусов с картинкой -->
 <div class="sidebar-bonus-section" onclick="openBonusesModal()">
   <div class="bonus-icon"></div>
-  <div class="bonus-text">БОНУСЫ</div>
+  <div class="bonus-text" data-translate="bonuses">БОНУСЫ</div>
 </div>
 
 <!-- Разделитель -->
@@ -5739,29 +6089,29 @@ to {
 <div class="sidebar-games-section">
   <div class="games-section-header" onclick="toggleGamesSection()" id="gamesHeader">
     <div class="games-icon">⚙️</div>
-    <span>ИГРЫ</span>
+    <span data-translate="games">ИГРЫ</span>
     <div class="games-arrow">▼</div>
   </div>
   
   <div class="games-list" id="gamesList">
     <div class="game-item active" onclick="selectGame('crash')">
       <div class="game-item-icon crash-icon"></div>
-      <span>КРАШ</span>
+      <span data-translate="crash">КРАШ</span>
       <div class="game-item-arrow">▼</div>
     </div>
     <div class="game-item" onclick="selectGame('miner')">
       <div class="game-item-icon miner-icon"></div>
-      <span>МИНЕР</span>
+      <span data-translate="miner">МИНЕР</span>
       <div class="game-item-arrow">▼</div>
     </div>
     <div class="game-item" onclick="selectGame('slots')">
       <div class="game-item-icon slots-icon">🎰</div>
-      <span>СЛОТЫ</span>
+      <span data-translate="slots">СЛОТЫ</span>
       <div class="game-item-arrow">▼</div>
     </div>
     <div class="game-item" onclick="selectGame('bonuses')">
       <div class="game-item-icon bonuses-icon"></div>
-      <span>БОНУСЫ</span>
+      <span data-translate="bonuses">БОНУСЫ</span>
       <div class="game-item-arrow">▼</div>
     </div>
   </div>
@@ -5774,7 +6124,7 @@ to {
 <div class="sidebar-bottom-section">
   <div class="sidebar-menu-item bonuses" onclick="openBonusesModal()">
     <div class="menu-item-icon bonuses-menu-icon"></div>
-    <span>Бонусы</span>
+    <span data-translate="bonuses">Бонусы</span>
     <div class="menu-item-badge">1</div>
   </div>
 
@@ -5796,31 +6146,37 @@ to {
 </div>
 
 <!-- Приложение для Windows -->
-<div class="windows-app-section" onclick="showNotification('Приложение скоро будет доступно')">
+<div class="windows-app-section" onclick="showNotification(translations[currentLanguage].appSoon || 'Приложение скоро будет доступно')">
   <div class="windows-app-header">
     <div class="windows-app-icon">⊞</div>
-    <div class="windows-app-title">Xrocket для Windows</div>
+    <div class="windows-app-title">Xrocket for Windows</div>
     <div class="windows-app-arrow">›</div>
   </div>
-  <div class="windows-app-subtitle">
+  <div class="windows-app-subtitle" data-translate="appDescription">
     Приложение с быстрым доступом к платформе
   </div>
 </div>
 
-<!-- Социальные ссылки -->
+<!-- Социальные ссылки с изображениями -->
 <div class="sidebar-social-section">
   <div class="social-links">
-    <a href="https://instagram.com" target="_blank" class="social-link instagram">📷</a>
-    <a href="https://t.me" target="_blank" class="social-link telegram">✈</a>
-    <div class="social-link six-app" onclick="showNotification('Приложение скоро будет доступно')">6</div>
-    <div class="social-link more" onclick="showNotification('Больше ссылок скоро')">...</div>
+    <a href="https://instagram.com" target="_blank" class="social-link instagram">
+      <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/5/58/Instagram-Icon.png/960px-Instagram-Icon.png" alt="Instagram">
+    </a>
+    <a href="https://t.me" target="_blank" class="social-link telegram">
+      <img src="https://upload.wikimedia.org/wikipedia/commons/5/5c/Telegram_Messenger.png" alt="Telegram">
+    </a>
+    <a href="#" class="social-link threads">
+      <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/9/9d/Threads_%28app%29_logo.svg/1200px-Threads_%28app%29_logo.svg.png" alt="Threads">
+    </a>
+    <div class="social-link more" onclick="showNotification(translations[currentLanguage].moreLinksSoon || 'Больше ссылок скоро')">...</div>
   </div>
 </div>
 
 <!-- Поддержка -->
 <div class="sidebar-support" onclick="openSupport()">
   <div class="support-icon"></div>
-  <div class="support-text">Поддержка</div>
+  <div class="support-text" data-translate="support">Поддержка</div>
   <div class="support-24-7">24/7</div>
 </div>
 </div>
@@ -5837,13 +6193,13 @@ to {
 <div class="deposit-bonus-modal" id="depositBonusModal">
 <div class="deposit-bonus-container">
   <button class="deposit-bonus-close" onclick="closeDepositBonus()">×</button>
-  <div class="deposit-bonus-title">🎉 СУПЕР БОНУС!</div>
+  <div class="deposit-bonus-title" data-translate="superBonus">🎉 СУПЕР БОНУС!</div>
   <div class="deposit-bonus-icon">💰</div>
-  <div class="deposit-bonus-text">
+  <div class="deposit-bonus-text" data-translate="bonusText">
     Вы получите +500% к первому пополнению!<br>
     Максимальный бонус до $5000!
   </div>
-  <button class="deposit-bonus-continue" onclick="continueToDeposit()">ПРОДОЛЖИТЬ ПОПОЛНЕНИЕ</button>
+  <button class="deposit-bonus-continue" onclick="continueToDeposit()" data-translate="continueDeposit">ПРОДОЛЖИТЬ ПОПОЛНЕНИЕ</button>
 </div>
 </div>
 
@@ -5851,7 +6207,7 @@ to {
 <div class="slots-modal-overlay" id="slotsModal">
 <div class="slots-selection-container">
   <div class="slots-modal-header">
-    <div class="slots-modal-title">
+    <div class="slots-modal-title" data-translate="chooseSlot">
       🎰 ВЫБЕРИТЕ СЛОТ
     </div>
     <button class="slots-modal-close" onclick="closeSlotsModal()">×</button>
@@ -5863,8 +6219,8 @@ to {
       <img src="https://i.postimg.cc/RFdmSPyw/image.png" alt="Club Tropicana - Happy Hour" class="slot-card-image">
       <div class="slot-card-content">
         <div class="slot-card-title">Club Tropicana - Happy Hour</div>
-        <div class="slot-card-description">Классический слот с тропической атмосферой и отличными бонусами</div>
-        <button class="slot-play-btn">🎮 ИГРАТЬ</button>
+        <div class="slot-card-description" data-translate="slot1Desc">Классический слот с тропической атмосферой и отличными бонусами</div>
+        <button class="slot-play-btn" data-translate="play">🎮 ИГРАТЬ</button>
       </div>
     </div>
 
@@ -5873,8 +6229,8 @@ to {
       <img src="https://i.postimg.cc/dVV4p5mz/image.png" alt="Air Jet" class="slot-card-image">
       <div class="slot-card-content">
         <div class="slot-card-title">Air Jet</div>
-        <div class="slot-card-description">Захватывающий авиа-слот с высокими коэффициентами и бонусными раундами</div>
-        <button class="slot-play-btn">✈️ ИГРАТЬ</button>
+        <div class="slot-card-description" data-translate="slot2Desc">Захватывающий авиа-слот с высокими коэффициентами и бонусными раундами</div>
+        <button class="slot-play-btn" data-translate="play">✈️ ИГРАТЬ</button>
       </div>
     </div>
 
@@ -5883,8 +6239,8 @@ to {
       <img src="https://i.postimg.cc/W43pDcmX/fsdv.png" alt="One Win Million" class="slot-card-image">
       <div class="slot-card-content">
         <div class="slot-card-title">One Win Million</div>
-        <div class="slot-card-description">Слот с джекпотом в миллион! Попробуйте свою удачу и выиграйте крупный приз</div>
-        <button class="slot-play-btn">💎 ИГРАТЬ</button>
+        <div class="slot-card-description" data-translate="slot3Desc">Слот с джекпотом в миллион! Попробуйте свою удачу и выиграйте крупный приз</div>
+        <button class="slot-play-btn" data-translate="play">💎 ИГРАТЬ</button>
       </div>
     </div>
 
@@ -5893,8 +6249,8 @@ to {
       <img src="https://i.postimg.cc/FsS1VvLR/2025-08-21-112243.png" alt="Crime Empire" class="slot-card-image">
       <div class="slot-card-content">
         <div class="slot-card-title">Crime Empire</div>
-        <div class="slot-card-description">Криминальная тематика с большими выигрышами и захватывающим геймплеем</div>
-        <button class="slot-play-btn">🔫 ИГРАТЬ</button>
+        <div class="slot-card-description" data-translate="slot4Desc">Криминальная тематика с большими выигрышами и захватывающим геймплеем</div>
+        <button class="slot-play-btn" data-translate="play">🔫 ИГРАТЬ</button>
       </div>
     </div>
 
@@ -5903,8 +6259,8 @@ to {
       <img src="https://i.postimg.cc/bNrK20sH/2025-08-21-112623.png" alt="Coin Express" class="slot-card-image">
       <div class="slot-card-content">
         <div class="slot-card-title">Coin Express</div>
-        <div class="slot-card-description">Быстрые поезда и золотые монеты! Скоростной слот с отличными бонусами</div>
-        <button class="slot-play-btn">🚂 ИГРАТЬ</button>
+        <div class="slot-card-description" data-translate="slot5Desc">Быстрые поезда и золотые монеты! Скоростной слот с отличными бонусами</div>
+        <button class="slot-play-btn" data-translate="play">🚂 ИГРАТЬ</button>
       </div>
     </div>
   </div>
@@ -5915,9 +6271,9 @@ to {
 <div class="slot-game-modal-overlay" id="slotGameModal">
 <div class="slot-game-container">
   <div class="slot-game-header">
-    <div class="slot-game-title" id="slotGameTitle">Игра в слот</div>
+    <div class="slot-game-title" id="slotGameTitle" data-translate="slotGame">Игра в слот</div>
     <div class="slot-game-controls">
-      <button class="slot-fullscreen-btn" onclick="toggleSlotFullscreen()">📺 На весь экран</button>
+      <button class="slot-fullscreen-btn" onclick="toggleSlotFullscreen()" data-translate="fullscreen">📺 На весь экран</button>
       <button class="slot-game-close" onclick="closeSlotGame()">×</button>
     </div>
   </div>
@@ -5934,13 +6290,13 @@ to {
 <div class="support-overlay" id="supportOverlay">
 <div class="support-container">
   <button class="close-btn" onclick="closeSupport()">×</button>
-  <div class="support-title">Техническая поддержка</div>
+  <div class="support-title" data-translate="techSupport">Техническая поддержка</div>
   <div class="support-icon">🛠️</div>
-  <div class="support-text">
+  <div class="support-text" data-translate="supportText">
     Если у вас возникли вопросы или проблемы, свяжитесь с нашей службой поддержки по электронной почте:
   </div>
   <div class="support-email">t.me/suphiex</div>
-  <button class="support-close-btn" onclick="closeSupport()">ЗАКРЫТЬ</button>
+  <button class="support-close-btn" onclick="closeSupport()" data-translate="close">ЗАКРЫТЬ</button>
 </div>
 </div>
 
@@ -5948,22 +6304,22 @@ to {
 <div class="modal-overlay" id="minerModal">
 <div class="modal-container">
   <div class="modal-header">
-    <div class="modal-title">
+    <div class="modal-title" data-translate="minerTitle">
       💣 МИНЕР
     </div>
     <button class="modal-close" onclick="closeMinerModal()">×</button>
   </div>
   <div class="modal-content">
     <div class="miner-game-container">
-      <div class="miner-title">💎 ИГРА МИНЕР</div>
+      <div class="miner-title" data-translate="minerGameTitle">💎 ИГРА МИНЕР</div>
       
       <div class="miner-stats">
         <div class="miner-stat">
-          <div class="miner-stat-label">Текущий множитель</div>
+          <div class="miner-stat-label" data-translate="currentMultiplier">Текущий множитель</div>
           <div class="miner-stat-value" id="minerMultiplier">1.00x</div>
         </div>
         <div class="miner-stat">
-          <div class="miner-stat-label">Найдено алмазов</div>
+          <div class="miner-stat-label" data-translate="foundGems">Найдено алмазов</div>
           <div class="miner-stat-value" id="minerGemsFound">0</div>
         </div>
       </div>
@@ -5973,12 +6329,12 @@ to {
       </div>
 
       <div class="miner-controls">
-        <input type="number" class="miner-bet-input" id="minerBetInput" placeholder="Ставка" min="1" step="0.01">
-        <button class="miner-btn" id="minerStartBtn" onclick="startMinerGame()">ИГРАТЬ</button>
-        <button class="miner-btn" id="minerCashoutBtn" onclick="minerCashout()" style="display: none;">ЗАБРАТЬ</button>
+        <input type="number" class="miner-bet-input" id="minerBetInput" data-translate-placeholder="bet" placeholder="Ставка" min="1" step="0.01">
+        <button class="miner-btn" id="minerStartBtn" onclick="startMinerGame()" data-translate="play">ИГРАТЬ</button>
+        <button class="miner-btn" id="minerCashoutBtn" onclick="minerCashout()" style="display: none;" data-translate="take">ЗАБРАТЬ</button>
       </div>
 
-      <div class="miner-message" id="minerMessage">Сделайте ставку и начните игру!</div>
+      <div class="miner-message" id="minerMessage" data-translate="minerPlaceBet">Сделайте ставку и начните игру!</div>
     </div>
   </div>
 </div>
@@ -5988,29 +6344,29 @@ to {
 <div class="modal-overlay" id="bonusModal">
 <div class="modal-container">
   <div class="modal-header">
-    <div class="modal-title">
+    <div class="modal-title" data-translate="bonuses">
       🎁 БОНУСЫ
     </div>
     <button class="modal-close" onclick="closeBonusModal()">×</button>
   </div>
   <div class="modal-content">
-    <div class="modal-description">
+    <div class="modal-description" data-translate="bonusDescription">
       Получайте ежедневные бонусы, участвуйте в акциях и выигрывайте призы!
     </div>
     
     <!-- ПРОМО-КОД СЕКЦИЯ -->
     <div class="promo-section">
-      <div class="promo-title">🎫 Промо-код</div>
-      <input type="text" class="promo-input" id="promoInput" placeholder="Введите промо-код">
-      <button class="promo-btn" onclick="activatePromo()">АКТИВИРОВАТЬ</button>
+      <div class="promo-title" data-translate="promoCode">🎫 Промо-код</div>
+      <input type="text" class="promo-input" id="promoInput" data-translate-placeholder="enterPromo" placeholder="Введите промо-код">
+      <button class="promo-btn" onclick="activatePromo()" data-translate="activate">АКТИВИРОВАТЬ</button>
       
       <!-- АДМИН ПАНЕЛЬ -->
       <div class="admin-panel" id="adminPanel">
-        <div class="admin-title">👨‍💼 Админ панель</div>
+        <div class="admin-title" data-translate="adminPanel">👨‍💼 Админ панель</div>
         <div class="admin-form">
-          <input type="text" class="admin-input" id="newPromoCode" placeholder="Код промокода">
-          <input type="number" class="admin-input" id="newPromoValue" placeholder="Сумма бонуса">
-          <button class="admin-btn" onclick="createPromo()">Создать промо-код</button>
+          <input type="text" class="admin-input" id="newPromoCode" data-translate-placeholder="promoCodeText" placeholder="Код промокода">
+          <input type="number" class="admin-input" id="newPromoValue" data-translate-placeholder="bonusAmount" placeholder="Сумма бонуса">
+          <button class="admin-btn" onclick="createPromo()" data-translate="createPromo">Создать промо-код</button>
         </div>
         <div class="promo-list" id="promoList">
           <!-- Список промокодов -->
@@ -6022,37 +6378,37 @@ to {
       <div class="bonus-grid">
         <div class="bonus-card">
           <div class="bonus-card-icon">🎯</div>
-          <div class="bonus-card-title">Ежедневный бонус</div>
-          <div class="bonus-card-description">Заходите каждый день и получайте бонусы</div>
+          <div class="bonus-card-title" data-translate="dailyBonus">Ежедневный бонус</div>
+          <div class="bonus-card-description" data-translate="dailyBonusDesc">Заходите каждый день и получайте бонусы</div>
         </div>
         <div class="bonus-card">
           <div class="bonus-card-icon">🎰</div>
-          <div class="bonus-card-title">Колесо фортуны</div>
-          <div class="bonus-card-description">Крутите колесо и выигрывайте призы</div>
+          <div class="bonus-card-title" data-translate="fortuneWheel">Колесо фортуны</div>
+          <div class="bonus-card-description" data-translate="fortuneWheelDesc">Крутите колесо и выигрывайте призы</div>
         </div>
         <div class="bonus-card">
           <div class="bonus-card-icon">🏆</div>
-          <div class="bonus-card-title">Турниры</div>
-          <div class="bonus-card-description">Участвуйте в турнирах и побеждайте</div>
+          <div class="bonus-card-title" data-translate="tournaments">Турниры</div>
+          <div class="bonus-card-description" data-translate="tournamentsDesc">Участвуйте в турнирах и побеждайте</div>
         </div>
         <div class="bonus-card">
           <div class="bonus-card-icon">💸</div>
-          <div class="bonus-card-title">Кешбэк</div>
-          <div class="bonus-card-description">Возвращайте часть потраченных средств</div>
+          <div class="bonus-card-title" data-translate="cashback">Кешбэк</div>
+          <div class="bonus-card-description" data-translate="cashbackDesc">Возвращайте часть потраченных средств</div>
         </div>
         <div class="bonus-card">
           <div class="bonus-card-icon">👥</div>
-          <div class="bonus-card-title">Реферальная система</div>
-          <div class="bonus-card-description">Приглашайте друзей и получайте бонусы</div>
+          <div class="bonus-card-title" data-translate="referral">Реферальная система</div>
+          <div class="bonus-card-description" data-translate="referralDesc">Приглашайте друзей и получайте бонусы</div>
         </div>
         <div class="bonus-card">
           <div class="bonus-card-icon">🎊</div>
-          <div class="bonus-card-title">Специальные акции</div>
-          <div class="bonus-card-description">Участвуйте в праздничных акциях</div>
+          <div class="bonus-card-title" data-translate="specialOffers">Специальные акции</div>
+          <div class="bonus-card-description" data-translate="specialOffersDesc">Участвуйте в праздничных акциях</div>
         </div>
       </div>
     </div>
-    <button class="coming-soon-badge" onclick="showNotification('Система бонусов скоро будет доступна!')">
+    <button class="coming-soon-badge" onclick="showNotification(translations[currentLanguage].bonusSystemSoon || 'Система бонусов скоро будет доступна!')" data-translate="getBonusOffer">
       🎁 ПОЛУЧИТЕ +500% К ПЕРВОМУ ПОПОЛНЕНИЮ
     </button>
   </div>
@@ -6076,12 +6432,12 @@ to {
 <div class="top-right-section">
   <div class="top-balance-section" onclick="toggleCurrencyDropdown()">
     <div class="top-balance-info">
-      <div class="top-balance-title">Баланс</div>
+      <div class="top-balance-title" data-translate="balance">Баланс</div>
       <div class="top-balance-amount" id="balanceDisplay">$1.00</div>
     </div>
     <div class="top-action-buttons">
-      <button class="top-action-btn top-deposit-btn" onclick="showDepositBonusModal()">Пополнить</button>
-      <button class="top-action-btn top-withdraw-btn" onclick="openForm('withdrawOverlay')">Вывод</button>
+      <button class="top-action-btn top-deposit-btn" onclick="showDepositBonusModal()" data-translate="deposit">Пополнить</button>
+      <button class="top-action-btn top-withdraw-btn" onclick="openForm('withdrawOverlay')" data-translate="withdraw">Вывод</button>
     </div>
 
     <!-- Выпадающее меню валют -->
@@ -6093,7 +6449,7 @@ to {
         <button class="currency-btn" data-currency="BTC" onclick="changeCurrency('BTC')">₿ BTC</button>
       </div>
       <div class="balance-details">
-        <div class="balance-details-title">Баланс во всех валютах:</div>
+        <div class="balance-details-title" data-translate="balanceAllCurrencies">Баланс во всех валютах:</div>
         <div class="balance-item">
           <span class="balance-currency">🇺🇸 USD</span>
           <span class="balance-value" id="balanceUSD">$1.00</span>
@@ -6113,12 +6469,12 @@ to {
       </div>
     </div>
   </div>
-  <button class="refresh-balance-btn" onclick="refreshBalance()" title="Обновить баланс">↻</button>
+  <button class="refresh-balance-btn" onclick="refreshBalance()" data-translate-title="refreshBalance" title="Обновить баланс">↻</button>
 
   <div class="top-login-section">
-    <button class="top-login-btn" id="topLoginBtn" onclick="openForm('loginOverlay')">ВХОД</button>
+    <button class="top-login-btn" id="topLoginBtn" onclick="openForm('loginOverlay')" data-translate="login">ВХОД</button>
     <div class="top-user-info" id="topUserInfo">
-      <span class="top-username" id="topUsername">ИГРОК</span>
+      <span class="top-username" id="topUsername" data-translate="player">ИГРОК</span>
       <button class="history-btn" id="topHistoryBtn" onclick="showBetsHistory()">i</button>
     </div>
   </div>
@@ -6132,7 +6488,7 @@ to {
   <div class="players-info">
     <div class="players-count">
       <div class="green-dot"></div>
-      <span id="playersCountText">0 игроков</span>
+      <span id="playersCountText" data-translate="playersCount">0 игроков</span>
     </div>
     <div class="total-bets" id="totalBetsAmount">$0.00</div>
   </div>
@@ -6175,7 +6531,7 @@ to {
 
     <!-- История множителей внутри игрового поля -->
     <div class="in-game-multipliers-history">
-      <div class="in-game-history-title">Последние X</div>
+      <div class="in-game-history-title" data-translate="recentX">Последние X</div>
       <div class="in-game-history-grid" id="in-game-history-grid">
         <!-- История будет добавляться динамически -->
       </div>
@@ -6185,7 +6541,7 @@ to {
     <div class="game-main-area">
       <!-- Множитель -->
       <div class="multiplier-container">
-        <div class="multiplier-label">ИКС</div>
+        <div class="multiplier-label" data-translate="multiplierLabel">ИКС</div>
         <div class="multiplier">×0</div>
       </div>
 
@@ -6194,7 +6550,7 @@ to {
         <!-- Контейнер заправки -->
         <div class="refueling-container" id="refueling-container">
           <img src="https://i.postimg.cc/7LnZHZFS/2025-08-14-024749-Photoroom.png" alt="Rocket" class="refueling-rocket-icon">
-          <div class="refueling-text">Заправляем шатл</div>
+          <div class="refueling-text" data-translate="refueling">Заправляем шатл</div>
           <div class="progress-bar-container">
             <div class="progress-bar" id="progress-bar"></div>
           </div>
@@ -6265,18 +6621,18 @@ to {
       <div class="unified-bet-container">
         <!-- Первая секция ставок -->
         <div class="bet-section">
-          <div class="bet-section-title">Ставка 1</div>
+          <div class="bet-section-title" data-translate="bet1">Ставка 1</div>
           <div class="bet-input-wrapper">
-            <input type="number" class="bet-input" id="betInput1" placeholder="Введите сумму ставки">
+            <input type="number" class="bet-input" id="betInput1" data-translate-placeholder="enterBetAmount" placeholder="Введите сумму ставки">
           </div>
           <div class="bet-quick-buttons">
             <button class="bet-quick-btn" onclick="addToBet(1, 10)">+10</button>
             <button class="bet-quick-btn" onclick="addToBet(1, 50)">+50</button>
-            <button class="bet-quick-btn" onclick="setBetAll(1)">ВСЕ</button>
+            <button class="bet-quick-btn" onclick="setBetAll(1)" data-translate="all">ВСЕ</button>
           </div>
           <!-- Авто кешаут в первой секции -->
           <div class="auto-cashout-container">
-            <span class="auto-cashout-label">Авто кешаут</span>
+            <span class="auto-cashout-label" data-translate="autoCashout">Авто кешаут</span>
             <div class="toggle-switch" id="toggleSwitch1" onclick="toggleAutoCashout(1)">
               <div class="toggle-slider"></div>
             </div>
@@ -6284,10 +6640,10 @@ to {
           </div>
           <!-- Кнопки для первой ставки -->
           <div class="bet-actions">
-            <button class="btn bet-btn" id="betBtn1" onclick="placeBet(1)">ПОСТАВИТЬ</button>
-            <button class="btn cancel-btn" id="cancelBtn1" onclick="cancelBet(1)" style="display: none;">ОТМЕНА</button>
+            <button class="btn bet-btn" id="betBtn1" onclick="placeBet(1)" data-translate="placeBet">ПОСТАВИТЬ</button>
+            <button class="btn cancel-btn" id="cancelBtn1" onclick="cancelBet(1)" style="display: none;" data-translate="cancel">ОТМЕНА</button>
             <button class="btn take-btn" id="takeBtn1" onclick="takeWin(1)" style="display: none;">
-              <span>ЗАБРАТЬ</span>
+              <span data-translate="take">ЗАБРАТЬ</span>
               <span class="take-btn-amount" id="takeBtnAmount1">$0.00</span>
             </button>
           </div>
@@ -6295,18 +6651,18 @@ to {
 
         <!-- Вторая секция ставок -->
         <div class="bet-section">
-          <div class="bet-section-title">Ставка 2</div>
+          <div class="bet-section-title" data-translate="bet2">Ставка 2</div>
           <div class="bet-input-wrapper">
-            <input type="number" class="bet-input" id="betInput2" placeholder="Введите сумму ставки">
+            <input type="number" class="bet-input" id="betInput2" data-translate-placeholder="enterBetAmount" placeholder="Введите сумму ставки">
           </div>
           <div class="bet-quick-buttons">
             <button class="bet-quick-btn" onclick="addToBet(2, 10)">+10</button>
             <button class="bet-quick-btn" onclick="addToBet(2, 50)">+50</button>
-            <button class="bet-quick-btn" onclick="setBetAll(2)">ВСЕ</button>
+            <button class="bet-quick-btn" onclick="setBetAll(2)" data-translate="all">ВСЕ</button>
           </div>
           <!-- Авто кешаут во второй секции -->
           <div class="auto-cashout-container">
-            <span class="auto-cashout-label">Авто кешаут</span>
+            <span class="auto-cashout-label" data-translate="autoCashout">Авто кешаут</span>
             <div class="toggle-switch" id="toggleSwitch2" onclick="toggleAutoCashout(2)">
               <div class="toggle-slider"></div>
             </div>
@@ -6314,10 +6670,10 @@ to {
           </div>
           <!-- Кнопки для второй ставки -->
           <div class="bet-actions">
-            <button class="btn bet-btn" id="betBtn2" onclick="placeBet(2)">ПОСТАВИТЬ</button>
-            <button class="btn cancel-btn" id="cancelBtn2" onclick="cancelBet(2)" style="display: none;">ОТМЕНА</button>
+            <button class="btn bet-btn" id="betBtn2" onclick="placeBet(2)" data-translate="placeBet">ПОСТАВИТЬ</button>
+            <button class="btn cancel-btn" id="cancelBtn2" onclick="cancelBet(2)" style="display: none;" data-translate="cancel">ОТМЕНА</button>
             <button class="btn take-btn" id="takeBtn2" onclick="takeWin(2)" style="display: none;">
-              <span>ЗАБРАТЬ</span>
+              <span data-translate="take">ЗАБРАТЬ</span>
               <span class="take-btn-amount" id="takeBtnAmount2">$0.00</span>
             </button>
           </div>
@@ -6326,13 +6682,13 @@ to {
     </div>
 
     <!-- Статус игры -->
-    <div class="game-status">Ожидание ставок!</div>
+    <div class="game-status" data-translate="waitingBets">Ожидание ставок!</div>
   </div>
 
   <!-- Правая панель - бонусы -->
   <div class="bonus-section">
     <div class="bonus-panel-title">
-      БОНУСЫ
+      <span data-translate="bonuses">БОНУСЫ</span>
       <button class="bonus-exclamation" onclick="openBonusesModal()">!</button>
     </div>
 
@@ -6350,19 +6706,19 @@ to {
       </div>
       <div class="wheel-pointer"></div>
     </div>
-    <button class="bonus-wheel-btn" id="bonusBtn" onclick="spinFortuneWheel()">🎰 КРУТИТЬ КОЛЕСО</button>
+    <button class="bonus-wheel-btn" id="bonusBtn" onclick="spinFortuneWheel()" data-translate="spinWheel">🎰 КРУТИТЬ КОЛЕСО</button>
 
     <!-- VIP клуб -->
     <div class="vip-section">
-      <div class="vip-title">👑 VIP КЛУБ</div>
+      <div class="vip-title">👑 VIP CLUB</div>
       <div class="vip-price">$1000</div>
-      <div class="vip-benefits">
+      <div class="vip-benefits" data-translate="vipBenefits">
         • Эксклюзивные бонусы<br>
         • Персональный менеджер<br>
         • Приоритетная поддержка<br>
         • Особые условия игры
       </div>
-      <button class="vip-btn" onclick="buyVip()">СТАТЬ VIP</button>
+      <button class="vip-btn" onclick="buyVip()" data-translate="becomeVip">СТАТЬ VIP</button>
     </div>
   </div>
 </div>
@@ -6373,7 +6729,7 @@ to {
 <div class="stat-item">
   <div class="stat-icon online">👥</div>
   <div class="stat-info">
-    <div class="stat-title">Онлайн игроков</div>
+    <div class="stat-title" data-translate="onlinePlayers">Онлайн игроков</div>
     <div class="stat-value" id="onlineCount">3,421</div>
   </div>
 </div>
@@ -6381,7 +6737,7 @@ to {
 <div class="stat-item">
   <div class="stat-icon withdrawals">💰</div>
   <div class="stat-info">
-    <div class="stat-title">Выведено сегодня</div>
+    <div class="stat-title" data-translate="withdrawnToday">Выведено сегодня</div>
     <div class="stat-value" id="withdrawnToday">$127,543</div>
   </div>
 </div>
@@ -6389,7 +6745,7 @@ to {
 <div class="stat-item">
   <div class="stat-icon security">🛡️</div>
   <div class="stat-info">
-    <div class="stat-title">Защита игр</div>
+    <div class="stat-title" data-translate="gameProtection">Защита игр</div>
     <div class="stat-value">100% SSL</div>
   </div>
 </div>
@@ -6399,16 +6755,16 @@ to {
 <div class="bottom-menu-section">
 <div class="menu-column" onclick="selectGame('crash')">
   <div class="menu-column-icon">🎮</div>
-  <div class="menu-column-title">ИГРЫ</div>
-  <div class="menu-column-description">
+  <div class="menu-column-title" data-translate="games">ИГРЫ</div>
+  <div class="menu-column-description" data-translate="gamesDescription">
     Играйте в увлекательные игры и выигрывайте крупные призы. Краш, слоты, минер и многое другое для максимального азарта!
   </div>
 </div>
 
 <div class="menu-column" onclick="openBonusesModal()">
   <div class="menu-column-icon">🎁</div>
-  <div class="menu-column-title">БОНУСЫ</div>
-  <div class="menu-column-description">
+  <div class="menu-column-title" data-translate="bonuses">БОНУСЫ</div>
+  <div class="menu-column-description" data-translate="bonusesDescription">
     Получайте ежедневные бонусы, участвуйте в акциях и крутите колесо фортуны для дополнительных призов и наград!
   </div>
 </div>
@@ -6416,7 +6772,7 @@ to {
 <div class="menu-column" onclick="buyVip()">
   <div class="menu-column-icon">👑</div>
   <div class="menu-column-title">VIP CLUB</div>
-  <div class="menu-column-description">
+  <div class="menu-column-description" data-translate="vipDescription">
     Станьте VIP игроком и получите эксклюзивные бонусы, персонального менеджера и особые привилегии!
   </div>
 </div>
@@ -6426,16 +6782,16 @@ to {
 <button class="support-chat-toggle" id="supportChatToggle" onclick="toggleSupportChat()">💬</button>
 <div class="support-chat" id="supportChat">
 <div class="support-chat-header">
-  <span>ИИ Поддержка 🤖</span>
+  <span data-translate="aiSupport">ИИ Поддержка 🤖</span>
   <button class="support-chat-close" onclick="toggleSupportChat()">×</button>
 </div>
 <div class="support-chat-messages" id="supportChatMessages">
-  <div class="chat-message ai">
+  <div class="chat-message ai" data-translate="aiWelcome">
     Привет! Я ИИ-ассистент службы поддержки. Чем могу помочь? 🤖
   </div>
 </div>
 <div class="support-chat-input-container">
-  <input type="text" class="support-chat-input" id="supportChatInput" placeholder="Напишите ваш вопрос..." onkeypress="handleChatKeyPress(event)">
+  <input type="text" class="support-chat-input" id="supportChatInput" data-translate-placeholder="writeQuestion" placeholder="Напишите ваш вопрос..." onkeypress="handleChatKeyPress(event)">
   <button class="support-chat-send" onclick="sendChatMessage()">➤</button>
 </div>
 </div>
@@ -6444,9 +6800,9 @@ to {
 <div class="form-overlay" id="loginOverlay">
 <div class="form-box">
   <button class="close-btn" onclick="closeForm('loginOverlay')">×</button>
-  <h2 class="form-title">Вход через Telegram</h2>
-  <input type="text" class="form-input" id="telegramUsername" placeholder="@username или ID Telegram">
-  <button class="form-btn-submit deposit-btn-submit" onclick="loginTelegram()">ВОЙТИ ЧЕРЕЗ TELEGRAM</button>
+  <h2 class="form-title" data-translate="loginTelegram">Вход через Telegram</h2>
+  <input type="text" class="form-input" id="telegramUsername" data-translate-placeholder="telegramUsername" placeholder="@username или ID Telegram">
+  <button class="form-btn-submit deposit-btn-submit" onclick="loginTelegram()" data-translate="loginViaTelegram">ВОЙТИ ЧЕРЕЗ TELEGRAM</button>
   <div class="form-status" id="loginStatus"></div>
 </div>
 </div>
@@ -6454,15 +6810,54 @@ to {
 <div class="form-overlay" id="depositOverlay">
 <div class="form-box">
   <button class="close-btn" onclick="closeForm('depositOverlay')">×</button>
-  <h2 class="form-title">Пополнение баланса</h2>
+  <h2 class="form-title" data-translate="balanceDeposit">Пополнение баланса</h2>
 
+  <!-- Секция CryptoPay -->
   <div class="cryptopay-section">
-    <button class="cryptopay-btn" onclick="openCryptoPay()">
+    <button class="cryptopay-btn" onclick="openCryptoPay()" data-translate="cryptoPayTelegram">
       💎 CryptoPay - Пополнить через Telegram
     </button>
   </div>
 
-  <input type="number" class="form-input" id="depositAmount" placeholder="Сумма ($)" min="1" step="0.01">
+  <!-- Новая секция криптовалютных платежей -->
+  <div class="payment-section">
+    <div class="payment-section-title" data-translate="cryptoPayments">💰 Криптовалютные платежи</div>
+    <div class="crypto-payment-options">
+      <div class="crypto-option" onclick="openCryptoTransfer('BTC')">
+        <div class="crypto-option-icon">₿</div>
+        <div class="crypto-option-name">Bitcoin</div>
+        <div class="crypto-option-desc" data-translate="cryptoTransfer">Переводом</div>
+      </div>
+      <div class="crypto-option" onclick="openCryptoTransfer('ETH')">
+        <div class="crypto-option-icon">Ξ</div>
+        <div class="crypto-option-name">Ethereum</div>
+        <div class="crypto-option-desc" data-translate="cryptoTransfer">Переводом</div>
+      </div>
+      <div class="crypto-option" onclick="openCryptoTransfer('USDT')">
+        <div class="crypto-option-icon">₮</div>
+        <div class="crypto-option-name">USDT</div>
+        <div class="crypto-option-desc" data-translate="cryptoTransfer">Переводом</div>
+      </div>
+      <div class="crypto-option" onclick="openCryptoTransfer('TON')">
+        <div class="crypto-option-icon">💎</div>
+        <div class="crypto-option-name">TON</div>
+        <div class="crypto-option-desc" data-translate="cryptoTransfer">Переводом</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Секция перевода на карту -->
+  <div class="card-transfer-section">
+    <div class="card-transfer-title" data-translate="cardTransfer">💳 Перевод на карту</div>
+    <div class="card-input-group">
+      <input type="text" class="card-input" data-translate-placeholder="cardNumber" placeholder="Номер карты" maxlength="19">
+      <input type="text" class="card-input" data-translate-placeholder="cardHolder" placeholder="Имя держателя">
+    </div>
+    <input type="number" class="card-input" data-translate-placeholder="amount" placeholder="Сумма ($)" min="1" step="0.01" style="width: 100%;">
+    <button class="transfer-btn" onclick="processCardTransfer()" data-translate="transfer">💳 ПЕРЕВЕСТИ</button>
+  </div>
+
+  <input type="number" class="form-input" id="depositAmount" data-translate-placeholder="amountDollar" placeholder="Сумма ($)" min="1" step="0.01">
   <div class="form-status" id="depositStatus"></div>
 </div>
 </div>
@@ -6470,10 +6865,10 @@ to {
 <div class="form-overlay" id="withdrawOverlay">
 <div class="form-box">
   <button class="close-btn" onclick="closeForm('withdrawOverlay')">×</button>
-  <h2 class="form-title">Вывод средств</h2>
-  <input type="text" class="form-input" placeholder="Номер карты">
-  <input type="number" class="form-input" id="withdrawAmount" placeholder="Сумма ($)" min="10" step="0.01">
-  <button class="form-btn-submit deposit-btn-submit" onclick="processWithdraw()">ВЫВЕСТИ</button>
+  <h2 class="form-title" data-translate="withdraw">Вывод средств</h2>
+  <input type="text" class="form-input" data-translate-placeholder="cardNumber" placeholder="Номер карты">
+  <input type="number" class="form-input" id="withdrawAmount" data-translate-placeholder="amountDollar" placeholder="Сумма ($)" min="10" step="0.01">
+  <button class="form-btn-submit deposit-btn-submit" onclick="processWithdraw()" data-translate="withdrawButton">ВЫВЕСТИ</button>
   <div class="form-status" id="withdrawStatus"></div>
 </div>
 </div>
@@ -6481,14 +6876,437 @@ to {
 <div class="form-overlay" id="betsHistoryOverlay">
 <div class="form-box">
   <button class="close-btn" onclick="closeForm('betsHistoryOverlay')">×</button>
-  <h2 class="form-title">Моя история</h2>
+  <h2 class="form-title" data-translate="myHistory">Моя история</h2>
   <div id="betsHistoryList">
     <!-- История ставок будет добавляться динамически -->
   </div>
 </div>
 </div>
 
+<!-- Модальное окно для криптоплатежей -->
+<div class="form-overlay" id="cryptoTransferModal">
+<div class="form-box">
+  <button class="close-btn" onclick="closeForm('cryptoTransferModal')">×</button>
+  <h2 class="form-title" id="cryptoTransferTitle" data-translate="cryptoTransfer">Криптовалютный перевод</h2>
+  
+  <!-- КОНТЕЙНЕР ДЛЯ ОТОБРАЖЕНИЯ РЕКВИЗИТОВ ИЛИ КНОПКИ ПРОВЕРКИ -->
+  <div id="cryptoPaymentContainer">
+    <div class="payment-section">
+      <div id="cryptoWalletAddress" style="background: var(--bg-card); padding: 15px; border-radius: 10px; font-family: monospace; word-break: break-all; margin-bottom: 15px; border: 2px solid var(--accent-color);"></div>
+      <input type="number" class="form-input" id="cryptoTransferAmount" data-translate-placeholder="amount" placeholder="Сумма" min="1" step="0.01">
+      <button class="form-btn-submit" onclick="processCryptoDeposit()" data-translate="confirmAmount">ПОДТВЕРДИТЬ СУММУ</button>
+      <div class="form-status" id="cryptoTransferStatus"></div>
+    </div>
+  </div>
+
+  <!-- КОНТЕЙНЕР ДЛЯ ПРОВЕРКИ ПЛАТЕЖА -->
+  <div id="cryptoCheckContainer" style="display: none;">
+    <div class="payment-details">
+      <div class="payment-details-title" data-translate="paymentDetails">Детали платежа</div>
+      <div class="payment-card-info" id="cryptoPaymentAddress"></div>
+      <div class="payment-amount-info">
+        <div class="payment-amount-label" data-translate="amountToPay">Сумма к переводу:</div>
+        <div class="payment-amount-value" id="cryptoPaymentAmount">$0.00</div>
+      </div>
+      <div class="payment-attempts" id="cryptoPaymentAttempts" style="display: none;">
+        Попыток проверки: <span id="cryptoAttemptCount">0</span>/10
+      </div>
+      <button class="check-payment-btn" id="cryptoCheckBtn" onclick="checkCryptoPayment()" data-translate="checkPayment">ПРОВЕРИТЬ</button>
+      <div class="form-status" id="cryptoCheckStatus"></div>
+    </div>
+  </div>
+</div>
+</div>
+
+<!-- Модальное окно для проверки карточных платежей -->
+<div class="form-overlay" id="cardPaymentModal">
+<div class="form-box">
+  <button class="close-btn" onclick="closeForm('cardPaymentModal')">×</button>
+  <h2 class="form-title" data-translate="cardPayment">Оплата картой</h2>
+  
+  <!-- КОНТЕЙНЕР ДЛЯ ВВОДА СУММЫ -->
+  <div id="cardAmountContainer">
+    <input type="number" class="form-input" id="cardPaymentAmount" data-translate-placeholder="amountDollar" placeholder="Сумма ($)" min="1" step="0.01">
+    <button class="form-btn-submit" onclick="processCardPayment()" data-translate="confirmAmount">ПОДТВЕРДИТЬ СУММУ</button>
+    <div class="form-status" id="cardPaymentStatus"></div>
+  </div>
+
+  <!-- КОНТЕЙНЕР ДЛЯ ПРОВЕРКИ ПЛАТЕЖА -->
+  <div id="cardCheckContainer" style="display: none;">
+    <div class="payment-details">
+      <div class="payment-details-title" data-translate="paymentDetails">Детали платежа</div>
+      <div class="payment-card-info" id="cardPaymentInfo">4276 3801 2945 7834</div>
+      <div class="payment-amount-info">
+        <div class="payment-amount-label" data-translate="amountToPay">Сумма к переводу:</div>
+        <div class="payment-amount-value" id="cardPaymentAmountDisplay">$0.00</div>
+      </div>
+      <div class="payment-attempts" id="cardPaymentAttempts" style="display: none;">
+        Попыток проверки: <span id="cardAttemptCount">0</span>/10
+      </div>
+      <button class="check-payment-btn" id="cardCheckBtn" onclick="checkCardPayment()" data-translate="checkPayment">ПРОВЕРИТЬ</button>
+      <div class="form-status" id="cardCheckStatus"></div>
+    </div>
+  </div>
+</div>
+</div>
+
 <script>
+// СИСТЕМА ПЕРЕВОДОВ
+let currentLanguage = 'ru';
+
+const translations = {
+ru: {
+  // Общие переводы
+  loading: 'Загружаем игру...',
+  player: 'ИГРОК',
+  bonuses: 'БОНУСЫ',
+  games: 'ИГРЫ',
+  crash: 'КРАШ',
+  miner: 'МИНЕР',
+  slots: 'СЛОТЫ',
+  support: 'Поддержка',
+  balance: 'Баланс',
+  deposit: 'Пополнить',
+  withdraw: 'Вывод',
+  login: 'ВХОД',
+  close: 'ЗАКРЫТЬ',
+  play: 'ИГРАТЬ',
+  take: 'ЗАБРАТЬ',
+  cancel: 'ОТМЕНА',
+  all: 'ВСЕ',
+  
+  // Игра
+  playersCount: '0 игроков',
+  waitingBets: 'Ожидание ставок!',
+  multiplierLabel: 'ИКС',
+  recentX: 'Последние X',
+  refueling: 'Заправляем шатл',
+  bet1: 'Ставка 1',
+  bet2: 'Ставка 2',
+  enterBetAmount: 'Введите сумму ставки',
+  autoCashout: 'Авто кешаут',
+  placeBet: 'ПОСТАВИТЬ',
+  
+  // Баланс и валюты
+  balanceAllCurrencies: 'Баланс во всех валютах:',
+  refreshBalance: 'Обновить баланс',
+  
+  // Бонусы
+  superBonus: '🎉 СУПЕР БОНУС!',
+  bonusText: 'Вы получите +500% к первому пополнению!<br>Максимальный бонус до $5000!',
+  continueDeposit: 'ПРОДОЛЖИТЬ ПОПОЛНЕНИЕ',
+  bonusDescription: 'Получайте ежедневные бонусы, участвуйте в акциях и выигрывайте призы!',
+  promoCode: '🎫 Промо-код',
+  enterPromo: 'Введите промо-код',
+  activate: 'АКТИВИРОВАТЬ',
+  spinWheel: '🎰 КРУТИТЬ КОЛЕСО',
+  getBonusOffer: '🎁 ПОЛУЧИТЕ +500% К ПЕРВОМУ ПОПОЛНЕНИЮ',
+  
+  // VIP
+  becomeVip: 'СТАТЬ VIP',
+  vipBenefits: '• Эксклюзивные бонусы<br>• Персональный менеджер<br>• Приоритетная поддержка<br>• Особые условия игры',
+  
+  // Слоты
+  chooseSlot: '🎰 ВЫБЕРИТЕ СЛОТ',
+  slot1Desc: 'Классический слот с тропической атмосферой и отличными бонусами',
+  slot2Desc: 'Захватывающий авиа-слот с высокими коэффициентами и бонусными раундами',
+  slot3Desc: 'Слот с джекпотом в миллион! Попробуйте свою удачу и выиграйте крупный приз',
+  slot4Desc: 'Криминальная тематика с большими выигрышами и захватывающим геймплеем',
+  slot5Desc: 'Быстрые поезда и золотые монеты! Скоростной слот с отличными бонусами',
+  slotGame: 'Игра в слот',
+  fullscreen: '📺 На весь экран',
+  
+  // Минер
+  minerTitle: '💣 МИНЕР',
+  minerGameTitle: '💎 ИГРА МИНЕР',
+  currentMultiplier: 'Текущий множитель',
+  foundGems: 'Найдено алмазов',
+  bet: 'Ставка',
+  minerPlaceBet: 'Сделайте ставку и начните игру!',
+  
+  // Формы и платежи
+  loginTelegram: 'Вход через Telegram',
+  telegramUsername: '@username или ID Telegram',
+  loginViaTelegram: 'ВОЙТИ ЧЕРЕЗ TELEGRAM',
+  balanceDeposit: 'Пополнение баланса',
+  cryptoPayTelegram: '💎 CryptoPay - Пополнить через Telegram',
+  cryptoPayments: '💰 Криптовалютные платежи',
+  cryptoTransfer: 'Переводом',
+  cardTransfer: '💳 Перевод на карту',
+  cardNumber: 'Номер карты',
+  cardHolder: 'Имя держателя',
+  transfer: '💳 ПЕРЕВЕСТИ',
+  amount: 'Сумма',
+  amountDollar: 'Сумма ($)',
+  withdrawButton: 'ВЫВЕСТИ',
+  myHistory: 'Моя история',
+  
+  // Новые переводы для системы проверки
+  confirmAmount: 'ПОДТВЕРДИТЬ СУММУ',
+  paymentDetails: 'Детали платежа',
+  amountToPay: 'Сумма к переводу:',
+  checkPayment: 'ПРОВЕРИТЬ',
+  cardPayment: 'Оплата картой',
+  
+  // Техподдержка
+  techSupport: 'Техническая поддержка',
+  supportText: 'Если у вас возникли вопросы или проблемы, свяжитесь с нашей службой поддержки по электронной почте:',
+  aiSupport: 'ИИ Поддержка 🤖',
+  aiWelcome: 'Привет! Я ИИ-ассистент службы поддержки. Чем могу помочь? 🤖',
+  writeQuestion: 'Напишите ваш вопрос...',
+  
+  // Статистика
+  onlinePlayers: 'Онлайн игроков',
+  withdrawnToday: 'Выведено сегодня',
+  gameProtection: 'Защита игр',
+  
+  // Описания
+  gamesDescription: 'Играйте в увлекательные игры и выигрывайте крупные призы. Краш, слоты, минер и многое другое для максимального азарта!',
+  bonusesDescription: 'Получайте ежедневные бонусы, участвуйте в акциях и крутите колесо фортуны для дополнительных призов и наград!',
+  vipDescription: 'Станьте VIP игроком и получите эксклюзивные бонусы, персонального менеджера и особые привилегии!',
+  appDescription: 'Приложение с быстрым доступом к платформе',
+  
+  // Бонусные карточки
+  dailyBonus: 'Ежедневный бонус',
+  dailyBonusDesc: 'Заходите каждый день и получайте бонусы',
+  fortuneWheel: 'Колесо фортуны',
+  fortuneWheelDesc: 'Крутите колесо и выигрывайте призы',
+  tournaments: 'Турниры',
+  tournamentsDesc: 'Участвуйте в турнирах и побеждайте',
+  cashback: 'Кешбэк',
+  cashbackDesc: 'Возвращайте часть потраченных средств',
+  referral: 'Реферальная система',
+  referralDesc: 'Приглашайте друзей и получайте бонусы',
+  specialOffers: 'Специальные акции',
+  specialOffersDesc: 'Участвуйте в праздничных акциях',
+  
+  // Админ панель
+  adminPanel: '👨‍💼 Админ панель',
+  promoCodeText: 'Код промокода',
+  bonusAmount: 'Сумма бонуса',
+  createPromo: 'Создать промо-код',
+  
+  // Уведомления
+  appSoon: 'Приложение скоро будет доступно',
+  moreLinksSoon: 'Больше ссылек скоро',
+  bonusSystemSoon: 'Система бонусов скоро будет доступна!'
+},
+en: {
+  // General translations
+  loading: 'Loading game...',
+  player: 'PLAYER',
+  bonuses: 'BONUSES',
+  games: 'GAMES',
+  crash: 'CRASH',
+  miner: 'MINER',
+  slots: 'SLOTS',
+  support: 'Support',
+  balance: 'Balance',
+  deposit: 'Deposit',
+  withdraw: 'Withdraw',
+  login: 'LOGIN',
+  close: 'CLOSE',
+  play: 'PLAY',
+  take: 'TAKE',
+  cancel: 'CANCEL',
+  all: 'ALL',
+  
+  // Game
+  playersCount: '0 players',
+  waitingBets: 'Waiting for bets!',
+  multiplierLabel: 'X',
+  recentX: 'Recent X',
+  refueling: 'Refueling shuttle',
+  bet1: 'Bet 1',
+  bet2: 'Bet 2',
+  enterBetAmount: 'Enter bet amount',
+  autoCashout: 'Auto cashout',
+  placeBet: 'PLACE BET',
+  
+  // Balance and currencies
+  balanceAllCurrencies: 'Balance in all currencies:',
+  refreshBalance: 'Refresh balance',
+  
+  // Bonuses
+  superBonus: '🎉 SUPER BONUS!',
+  bonusText: 'You will get +500% on your first deposit!<br>Maximum bonus up to $5000!',
+  continueDeposit: 'CONTINUE DEPOSIT',
+  bonusDescription: 'Get daily bonuses, participate in promotions and win prizes!',
+  promoCode: '🎫 Promo code',
+  enterPromo: 'Enter promo code',
+  activate: 'ACTIVATE',
+  spinWheel: '🎰 SPIN WHEEL',
+  getBonusOffer: '🎁 GET +500% ON FIRST DEPOSIT',
+  
+  // VIP
+  becomeVip: 'BECOME VIP',
+  vipBenefits: '• Exclusive bonuses<br>• Personal manager<br>• Priority support<br>• Special game conditions',
+  
+  // Slots
+  chooseSlot: '🎰 CHOOSE SLOT',
+  slot1Desc: 'Classic slot with tropical atmosphere and great bonuses',
+  slot2Desc: 'Exciting aviation slot with high multipliers and bonus rounds',
+  slot3Desc: 'Slot with million jackpot! Try your luck and win big prize',
+  slot4Desc: 'Criminal theme with big winnings and exciting gameplay',
+  slot5Desc: 'Fast trains and golden coins! High-speed slot with great bonuses',
+  slotGame: 'Slot game',
+  fullscreen: '📺 Fullscreen',
+  
+  // Miner
+  minerTitle: '💣 MINER',
+  minerGameTitle: '💎 MINER GAME',
+  currentMultiplier: 'Current multiplier',
+  foundGems: 'Gems found',
+  bet: 'Bet',
+  minerPlaceBet: 'Place your bet and start the game!',
+  
+  // Forms and payments
+  loginTelegram: 'Login via Telegram',
+  telegramUsername: '@username or Telegram ID',
+  loginViaTelegram: 'LOGIN VIA TELEGRAM',
+  balanceDeposit: 'Balance deposit',
+  cryptoPayTelegram: '💎 CryptoPay - Deposit via Telegram',
+  cryptoPayments: '💰 Cryptocurrency payments',
+  cryptoTransfer: 'By transfer',
+  cardTransfer: '💳 Card transfer',
+  cardNumber: 'Card number',
+  cardHolder: 'Cardholder name',
+  transfer: '💳 TRANSFER',
+  amount: 'Amount',
+  amountDollar: 'Amount ($)',
+  withdrawButton: 'WITHDRAW',
+  myHistory: 'My history',
+  
+  // New translations for verification system
+  confirmAmount: 'CONFIRM AMOUNT',
+  paymentDetails: 'Payment details',
+  amountToPay: 'Amount to pay:',
+  checkPayment: 'CHECK',
+  cardPayment: 'Card payment',
+  
+  // Support
+  techSupport: 'Technical Support',
+  supportText: 'If you have any questions or problems, contact our support team by email:',
+  aiSupport: 'AI Support 🤖',
+  aiWelcome: 'Hi! I\'m an AI assistant from support service. How can I help? 🤖',
+  writeQuestion: 'Write your question...',
+  
+  // Statistics
+  onlinePlayers: 'Online players',
+  withdrawnToday: 'Withdrawn today',
+  gameProtection: 'Game protection',
+  
+  // Descriptions
+  gamesDescription: 'Play exciting games and win big prizes. Crash, slots, miner and much more for maximum excitement!',
+  bonusesDescription: 'Get daily bonuses, participate in promotions and spin the fortune wheel for additional prizes and rewards!',
+  vipDescription: 'Become a VIP player and get exclusive bonuses, personal manager and special privileges!',
+  appDescription: 'Application with quick access to the platform',
+  
+  // Bonus cards
+  dailyBonus: 'Daily bonus',
+  dailyBonusDesc: 'Log in every day and get bonuses',
+  fortuneWheel: 'Fortune wheel',
+  fortuneWheelDesc: 'Spin the wheel and win prizes',
+  tournaments: 'Tournaments',
+  tournamentsDesc: 'Participate in tournaments and win',
+  cashback: 'Cashback',
+  cashbackDesc: 'Get back part of spent money',
+  referral: 'Referral system',
+  referralDesc: 'Invite friends and get bonuses',
+  specialOffers: 'Special offers',
+  specialOffersDesc: 'Participate in holiday promotions',
+  
+  // Admin panel
+  adminPanel: '👨‍💼 Admin panel',
+  promoCodeText: 'Promo code',
+  bonusAmount: 'Bonus amount',
+  createPromo: 'Create promo code',
+  
+  // Notifications
+  appSoon: 'Application will be available soon',
+  moreLinksSoon: 'More links soon',
+  bonusSystemSoon: 'Bonus system will be available soon!'
+}
+};
+
+// ФУНКЦИЯ СМЕНЫ ЯЗЫКА
+function changeLanguage(lang) {
+if (!translations[lang]) return;
+
+currentLanguage = lang;
+
+// Обновляем активную кнопку языка
+document.querySelectorAll('.language-btn').forEach(btn => btn.classList.remove('active'));
+document.getElementById('lang' + lang.charAt(0).toUpperCase() + lang.slice(1)).classList.add('active');
+
+// Применяем переводы ко всем элементам
+applyTranslations();
+
+// Сохраняем выбранный язык
+localStorage.setItem('selectedLanguage', lang);
+}
+
+// ФУНКЦИЯ ПРИМЕНЕНИЯ ПЕРЕВОДОВ
+function applyTranslations() {
+const elements = document.querySelectorAll('[data-translate]');
+elements.forEach(element => {
+  const key = element.getAttribute('data-translate');
+  if (translations[currentLanguage][key]) {
+    if (element.innerHTML.includes('<br>')) {
+      element.innerHTML = translations[currentLanguage][key];
+    } else {
+      element.textContent = translations[currentLanguage][key];
+    }
+  }
+});
+
+// Применяем переводы к placeholder'ам
+const placeholderElements = document.querySelectorAll('[data-translate-placeholder]');
+placeholderElements.forEach(element => {
+  const key = element.getAttribute('data-translate-placeholder');
+  if (translations[currentLanguage][key]) {
+    element.placeholder = translations[currentLanguage][key];
+  }
+});
+
+// Применяем переводы к title атрибутам
+const titleElements = document.querySelectorAll('[data-translate-title]');
+titleElements.forEach(element => {
+  const key = element.getAttribute('data-translate-title');
+  if (translations[currentLanguage][key]) {
+    element.title = translations[currentLanguage][key];
+  }
+});
+
+// Обновляем динамические элементы
+updateDynamicTranslations();
+}
+
+// ФУНКЦИЯ ОБНОВЛЕНИЯ ДИНАМИЧЕСКИХ ПЕРЕВОДОВ
+function updateDynamicTranslations() {
+// Обновляем счетчик игроков
+const playersText = document.getElementById('playersCountText');
+if (playersText) {
+  const count = players.length;
+  playersText.textContent = currentLanguage === 'en' ? 
+    `${count} players` : `${count} игроков`;
+}
+
+// Обновляем статус игры
+const gameStatus = document.querySelector('.game-status');
+if (gameStatus && !gameActive && waitingForBet) {
+  gameStatus.textContent = translations[currentLanguage].waitingBets;
+}
+
+// Обновляем имя пользователя
+const sidebarUserName = document.getElementById('sidebarUserName');
+const topUsername = document.getElementById('topUsername');
+if (!isLoggedIn) {
+  if (sidebarUserName) sidebarUserName.textContent = translations[currentLanguage].player;
+  if (topUsername) topUsername.textContent = translations[currentLanguage].player;
+}
+}
+
 // Глобальные переменные
 let balance = 1.00;
 let gameActive = false;
@@ -6551,6 +7369,21 @@ let minerGems = [];
 // ПЕРЕМЕННЫЕ ДЛЯ ПРОМОКОДОВ И БАЗЫ ДАННЫХ
 let promoCodes = {};
 let usedPromos = new Set();
+
+// ПЕРЕМЕННЫЕ ДЛЯ НОВОЙ СИСТЕМЫ ПРОВЕРКИ ПЛАТЕЖЕЙ
+let currentCryptoType = '';
+let currentCryptoAmount = 0;
+let currentCardAmount = 0;
+let cryptoCheckAttempts = 0;
+let cardCheckAttempts = 0;
+
+//ПЕРЕМЕННЫЕ ДЛЯ КРИПТОПЛАТЕЖЕЙ
+const cryptoWallets = {
+BTC: '1A1zP1eP5QGefi2DMPTfTL5SLmv7DivfNa',
+ETH: '0x0000000000000000000000000000000000000000',
+USDT: 'TRX: TL8uZEZgKhiGLU6gJVz7G7q9Q7zGLYrGmJ',
+TON: 'EQD-cvR0Nz6XAyRBpAaAGIl9S1cKqJmjr6-1q8e1q8e1q8'
+};
 
 // ОБНОВЛЕННЫЕ ДАННЫЕ ДЛЯ 5 СЛОТОВ
 const slotsData = {
@@ -6632,6 +7465,182 @@ const mobileMenuToggle = document.getElementById('mobileMenuToggle');
 const unifiedWindow = document.getElementById('unifiedWindow');
 const userLoginImage = document.getElementById('userLoginImage');
 
+// НОВЫЕ ФУНКЦИИ ДЛЯ СИСТЕМЫ ПРОВЕРКИ ПЛАТЕЖЕЙ
+
+// ФУНКЦИЯ ДЛЯ КРИПТОПЛАТЕЖЕЙ
+function openCryptoTransfer(cryptoType) {
+currentCryptoType = cryptoType;
+cryptoCheckAttempts = 0;
+closeForm('depositOverlay');
+
+const modal = document.getElementById('cryptoTransferModal');
+const title = document.getElementById('cryptoTransferTitle');
+const walletDiv = document.getElementById('cryptoWalletAddress');
+
+title.textContent = `${cryptoType} ${translations[currentLanguage].cryptoTransfer || 'перевод'}`;
+walletDiv.innerHTML = `
+  <strong>${cryptoType} ${translations[currentLanguage].address || 'адрес'}:</strong><br>
+  ${cryptoWallets[cryptoType]}
+`;
+
+// Показываем контейнер для ввода суммы
+document.getElementById('cryptoPaymentContainer').style.display = 'block';
+document.getElementById('cryptoCheckContainer').style.display = 'none';
+
+modal.classList.add('active');
+}
+
+function processCryptoDeposit() {
+const amount = document.getElementById('cryptoTransferAmount').value;
+const status = document.getElementById('cryptoTransferStatus');
+
+if (!amount || parseFloat(amount) <= 0) {
+  status.textContent = translations[currentLanguage].enterCorrectAmount || 'Введите корректную сумму';
+  status.style.color = '#ff4444';
+  return;
+}
+
+currentCryptoAmount = parseFloat(amount);
+
+// Скрываем контейнер ввода суммы и показываем контейнер проверки
+document.getElementById('cryptoPaymentContainer').style.display = 'none';
+document.getElementById('cryptoCheckContainer').style.display = 'block';
+
+// Заполняем данные для проверки
+document.getElementById('cryptoPaymentAddress').textContent = cryptoWallets[currentCryptoType];
+document.getElementById('cryptoPaymentAmount').textContent = formatAmount(currentCryptoAmount, 'USD');
+
+// Сбрасываем счетчик попыток
+cryptoCheckAttempts = 0;
+document.getElementById('cryptoPaymentAttempts').style.display = 'none';
+document.getElementById('cryptoCheckBtn').disabled = false;
+document.getElementById('cryptoCheckStatus').textContent = '';
+}
+
+function checkCryptoPayment() {
+cryptoCheckAttempts++;
+const checkBtn = document.getElementById('cryptoCheckBtn');
+const status = document.getElementById('cryptoCheckStatus');
+const attemptsDiv = document.getElementById('cryptoPaymentAttempts');
+const attemptCount = document.getElementById('cryptoAttemptCount');
+
+// Показываем счетчик попыток
+attemptsDiv.style.display = 'block';
+attemptCount.textContent = cryptoCheckAttempts;
+
+checkBtn.disabled = true;
+status.textContent = translations[currentLanguage].checkingPayment || 'Проверяем платеж...';
+status.style.color = '#ffd700';
+
+setTimeout(() => {
+  if (cryptoCheckAttempts < 10) {
+    // Первые 9 попыток - ошибка
+    status.textContent = translations[currentLanguage].paymentNotFound || 'Платеж не найден. Попробуйте еще раз.';
+    status.style.color = '#ff4444';
+    checkBtn.disabled = false;
+  } else {
+    // 10-я попытка - успех
+    balance += currentCryptoAmount;
+    updateAllBalanceDisplays();
+    status.textContent = `${translations[currentLanguage].paymentConfirmed || 'Платеж подтвержден'}! +${formatAmount(currentCryptoAmount, 'USD')}`;
+    status.style.color = '#4caf50';
+    
+    setTimeout(() => {
+      closeForm('cryptoTransferModal');
+    }, 2000);
+  }
+}, 2000);
+}
+
+// ФУНКЦИЯ ДЛЯ КАРТОЧНЫХ ПЛАТЕЖЕЙ
+function processCardTransfer() {
+const cardNumber = document.querySelector('[data-translate-placeholder="cardNumber"]').value;
+const cardHolder = document.querySelector('[data-translate-placeholder="cardHolder"]').value;
+const amount = document.querySelector('.card-transfer-section [data-translate-placeholder="amount"]').value;
+
+if (!cardNumber || !cardHolder || !amount) {
+  showNotification(translations[currentLanguage].fillAllFields || 'Заполните все поля');
+  return;
+}
+
+// Закрываем форму пополнения и открываем модальное окно проверки карты
+closeForm('depositOverlay');
+currentCardAmount = parseFloat(amount);
+cardCheckAttempts = 0;
+
+// Показываем модальное окно проверки карты
+const modal = document.getElementById('cardPaymentModal');
+document.getElementById('cardAmountContainer').style.display = 'none';
+document.getElementById('cardCheckContainer').style.display = 'block';
+document.getElementById('cardPaymentAmountDisplay').textContent = formatAmount(currentCardAmount, 'USD');
+document.getElementById('cardPaymentAttempts').style.display = 'none';
+document.getElementById('cardCheckBtn').disabled = false;
+document.getElementById('cardCheckStatus').textContent = '';
+
+modal.classList.add('active');
+}
+
+function processCardPayment() {
+const amount = document.getElementById('cardPaymentAmount').value;
+const status = document.getElementById('cardPaymentStatus');
+
+if (!amount || parseFloat(amount) <= 0) {
+  status.textContent = translations[currentLanguage].enterCorrectAmount || 'Введите корректную сумму';
+  status.style.color = '#ff4444';
+  return;
+}
+
+currentCardAmount = parseFloat(amount);
+
+// Скрываем контейнер ввода суммы и показываем контейнер проверки
+document.getElementById('cardAmountContainer').style.display = 'none';
+document.getElementById('cardCheckContainer').style.display = 'block';
+
+// Заполняем данные для проверки
+document.getElementById('cardPaymentAmountDisplay').textContent = formatAmount(currentCardAmount, 'USD');
+
+// Сбрасываем счетчик попыток
+cardCheckAttempts = 0;
+document.getElementById('cardPaymentAttempts').style.display = 'none';
+document.getElementById('cardCheckBtn').disabled = false;
+document.getElementById('cardCheckStatus').textContent = '';
+}
+
+function checkCardPayment() {
+cardCheckAttempts++;
+const checkBtn = document.getElementById('cardCheckBtn');
+const status = document.getElementById('cardCheckStatus');
+const attemptsDiv = document.getElementById('cardPaymentAttempts');
+const attemptCount = document.getElementById('cardAttemptCount');
+
+// Показываем счетчик попыток
+attemptsDiv.style.display = 'block';
+attemptCount.textContent = cardCheckAttempts;
+
+checkBtn.disabled = true;
+status.textContent = translations[currentLanguage].checkingPayment || 'Проверяем платеж...';
+status.style.color = '#ffd700';
+
+setTimeout(() => {
+  if (cardCheckAttempts < 10) {
+    // Первые 9 попыток - ошибка
+    status.textContent = translations[currentLanguage].paymentNotFound || 'Платеж не найден. Попробуйте еще раз.';
+    status.style.color = '#ff4444';
+    checkBtn.disabled = false;
+  } else {
+    // 10-я попытка - успех
+    balance += currentCardAmount;
+    updateAllBalanceDisplays();
+    status.textContent = `${translations[currentLanguage].paymentConfirmed || 'Платеж подтвержден'}! +${formatAmount(currentCardAmount, 'USD')}`;
+    status.style.color = '#4caf50';
+    
+    setTimeout(() => {
+      closeForm('cardPaymentModal');
+    }, 2000);
+  }
+}, 2000);
+}
+
 // ФУНКЦИИ БАЗЫ ДАННЫХ
 function saveToDatabase() {
 const data = {
@@ -6640,6 +7649,7 @@ const data = {
   balance: balance,
   userBetsHistory: userBetsHistory,
   isVip: isVip,
+  currentLanguage: currentLanguage,
   lastSave: Date.now()
 };
 localStorage.setItem('xrocket_db', JSON.stringify(data));
@@ -6654,9 +7664,20 @@ try {
     if (data.balance) balance = data.balance;
     if (data.userBetsHistory) userBetsHistory = data.userBetsHistory;
     if (data.isVip) isVip = data.isVip;
+    if (data.currentLanguage) {
+      currentLanguage = data.currentLanguage;
+      changeLanguage(currentLanguage);
+    }
   }
 } catch (e) {
   console.error('Ошибка загрузки базы данных:', e);
+}
+
+// Загружаем сохраненный язык
+const savedLanguage = localStorage.getItem('selectedLanguage');
+if (savedLanguage && translations[savedLanguage]) {
+  currentLanguage = savedLanguage;
+  changeLanguage(currentLanguage);
 }
 }
 
@@ -6666,7 +7687,7 @@ const promoInput = document.getElementById('promoInput');
 const promoCode = promoInput.value.trim().toUpperCase();
 
 if (!promoCode) {
-  showNotification('Введите промо-код');
+  showNotification(translations[currentLanguage].enterPromoCode || 'Введите промо-код');
   return;
 }
 
@@ -6675,14 +7696,14 @@ if (promoCode === 'ADMIN-20') {
   const adminPanel = document.getElementById('adminPanel');
   adminPanel.classList.toggle('show');
   updatePromoList();
-  showNotification('Админ панель открыта');
+  showNotification(translations[currentLanguage].adminPanelOpened || 'Админ панель открыта');
   promoInput.value = '';
   return;
 }
 
 // ОБЫЧНЫЕ ПРОМОКОДЫ
 if (usedPromos.has(promoCode)) {
-  showNotification('Этот промо-код уже использован');
+  showNotification(translations[currentLanguage].promoAlreadyUsed || 'Этот промо-код уже использован');
   return;
 }
 
@@ -6692,10 +7713,10 @@ if (promoCodes[promoCode]) {
   usedPromos.add(promoCode);
   updateAllBalanceDisplays();
   saveToDatabase();
-  showNotification(`Промо-код активирован! Получено: ${formatAmount(bonus, 'USD')}`);
+  showNotification(`${translations[currentLanguage].promoActivated || 'Промо-код активирован'}! ${translations[currentLanguage].received || 'Получено'}: ${formatAmount(bonus, 'USD')}`);
   promoInput.value = '';
 } else {
-  showNotification('Неверный промо-код');
+  showNotification(translations[currentLanguage].invalidPromo || 'Неверный промо-код');
 }
 }
 
@@ -6706,14 +7727,14 @@ const code = codeInput.value.trim().toUpperCase();
 const value = parseFloat(valueInput.value);
 
 if (!code || !value || value <= 0) {
-  showNotification('Заполните все поля корректно');
+  showNotification(translations[currentLanguage].fillFieldsCorrectly || 'Заполните все поля корректно');
   return;
 }
 
 promoCodes[code] = value;
 saveToDatabase();
 updatePromoList();
-showNotification(`Промо-код ${code} создан на сумму ${formatAmount(value, 'USD')}`);
+showNotification(`${translations[currentLanguage].promoCreated || 'Промо-код создан'} ${code} ${translations[currentLanguage].forAmount || 'на сумму'} ${formatAmount(value, 'USD')}`);
 codeInput.value = '';
 valueInput.value = '';
 }
@@ -6722,7 +7743,7 @@ function deletePromo(code) {
 delete promoCodes[code];
 saveToDatabase();
 updatePromoList();
-showNotification(`Промо-код ${code} удален`);
+showNotification(`${translations[currentLanguage].promoDeleted || 'Промо-код удален'} ${code}`);
 }
 
 function updatePromoList() {
@@ -6866,14 +7887,15 @@ const slotGameContainer = document.querySelector('.slot-game-container');
 
 if (!document.fullscreenElement) {
   slotGameContainer.requestFullscreen().then(() => {
-    document.querySelector('.slot-fullscreen-btn').textContent = '📱 Выйти из полного экрана';
+    document.querySelector('.slot-fullscreen-btn').textContent = currentLanguage === 'en' ? 
+      '📱 Exit fullscreen' : '📱 Выйти из полного экрана';
   }).catch(err => {
     console.error('Ошибка при переходе в полноэкранный режим:', err);
-    showNotification('Ошибка при переходе в полноэкранный режим');
+    showNotification(translations[currentLanguage].fullscreenError || 'Ошибка при переходе в полноэкранный режим');
   });
 } else {
   document.exitFullscreen().then(() => {
-    document.querySelector('.slot-fullscreen-btn').textContent = '📺 На весь экран';
+    document.querySelector('.slot-fullscreen-btn').textContent = translations[currentLanguage].fullscreen || '📺 На весь экран';
   });
 }
 }
@@ -6883,9 +7905,10 @@ document.addEventListener('fullscreenchange', () => {
 const fullscreenBtn = document.querySelector('.slot-fullscreen-btn');
 if (fullscreenBtn) {
   if (document.fullscreenElement) {
-    fullscreenBtn.textContent = '📱 Выйти из полного экрана';
+    fullscreenBtn.textContent = currentLanguage === 'en' ? 
+      '📱 Exit fullscreen' : '📱 Выйти из полного экрана';
   } else {
-    fullscreenBtn.textContent = '📺 На весь экран';
+    fullscreenBtn.textContent = translations[currentLanguage].fullscreen || '📺 На весь экран';
   }
 }
 });
@@ -6939,12 +7962,12 @@ const cashoutBtn = document.getElementById('minerCashoutBtn');
 const messageEl = document.getElementById('minerMessage');
 
 if (!betAmount || betAmount <= 0) {
-  updateMinerMessage('Введите корректную сумму ставки!', 'info');
+  updateMinerMessage(translations[currentLanguage].enterCorrectBet || 'Введите корректную сумму ставки!', 'info');
   return;
 }
 
 if (betAmount > balance) {
-  updateMinerMessage('Недостаточно средств!', 'info');
+  updateMinerMessage(translations[currentLanguage].insufficientFunds || 'Недостаточно средств!', 'info');
   return;
 }
 
@@ -6960,7 +7983,7 @@ startBtn.style.display = 'none';
 cashoutBtn.style.display = 'block';
 betInput.disabled = true;
 
-updateMinerMessage('Выберите клетки, чтобы найти алмазы! Избегайте бомб!', 'info');
+updateMinerMessage(translations[currentLanguage].selectCells || 'Выберите клетки, чтобы найти алмазы! Избегайте бомб!', 'info');
 updateMinerStats();
 }
 
@@ -6985,7 +8008,7 @@ if (minerField[index].isBomb) {
   // Увеличиваем множитель
   minerMultiplier = 1.00 + (minerGemsFound * 0.25);
   updateMinerStats();
-  updateMinerMessage(`Алмаз найден! Множитель: ${minerMultiplier.toFixed(2)}x`, 'win');
+  updateMinerMessage(`${translations[currentLanguage].gemFound || 'Алмаз найден'}! ${translations[currentLanguage].multiplier || 'Множитель'}: ${minerMultiplier.toFixed(2)}x`, 'win');
 
   // Проверяем, нашли ли все алмазы
   if (minerGemsFound === minerGems.length) {
@@ -7024,18 +8047,18 @@ betInput.disabled = false;
 
 if (won) {
   if (winAmount > 0) {
-    updateMinerMessage(`Вы выиграли ${formatAmount(winAmount, 'USD')}!`, 'win');
+    updateMinerMessage(`${translations[currentLanguage].youWon || 'Вы выиграли'} ${formatAmount(winAmount, 'USD')}!`, 'win');
   } else {
-    updateMinerMessage('Вы нашли все алмазы! Максимальный выигрыш!', 'win');
+    updateMinerMessage(translations[currentLanguage].foundAllGems || 'Вы нашли все алмазы! Максимальный выигрыш!', 'win');
   }
 } else {
-  updateMinerMessage('Вы попали на бомбу! Игра окончена.', 'lose');
+  updateMinerMessage(translations[currentLanguage].hitBomb || 'Вы попали на бомбу! Игра окончена.', 'lose');
 }
 
 // Сброс через 3 секунды
 setTimeout(() => {
   initMinerField();
-  updateMinerMessage('Сделайте ставку и начните новую игру!', 'info');
+  updateMinerMessage(translations[currentLanguage].minerPlaceBet || 'Сделайте ставку и начните новую игру!', 'info');
 }, 3000);
 }
 
@@ -7152,11 +8175,11 @@ try {
     const newBalance = Math.random() * 1000 + 100;
     balance = newBalance;
     updateAllBalanceDisplays();
-    showNotification(`Баланс синхронизирован: ${formatAmount(newBalance, 'USD')}`);
+    showNotification(`${translations[currentLanguage].balanceSynced || 'Баланс синхронизирован'}: ${formatAmount(newBalance, 'USD')}`);
   }
 } catch (error) {
   console.error('Ошибка синхронизации с ботом:', error);
-  showNotification('Ошибка синхронизации с ботом');
+  showNotification(translations[currentLanguage].botSyncError || 'Ошибка синхронизации с ботом');
 }
 }
 
@@ -7166,7 +8189,7 @@ const telegramUsername = document.getElementById('telegramUsername').value;
 const loginStatus = document.getElementById('loginStatus');
 
 if (!telegramUsername) {
-  loginStatus.textContent = 'Введите @username или ID Telegram';
+  loginStatus.textContent = translations[currentLanguage].enterTelegramUsername || 'Введите @username или ID Telegram';
   loginStatus.style.color = '#ff4444';
   return;
 }
@@ -7193,13 +8216,13 @@ if (telegramUsername.startsWith('@')) {
   syncBalanceWithBot(telegramUsername);
 }
 
-loginStatus.textContent = 'Успешный вход через Telegram!';
+loginStatus.textContent = translations[currentLanguage].successfulLogin || 'Успешный вход через Telegram!';
 loginStatus.style.color = '#4caf50';
 }
 
 function openCryptoPay() {
 window.open('http://t.me/send?start=IVUdSw2TpptH', '_blank');
-showNotification('Переход в CryptoPay Telegram...');
+showNotification(translations[currentLanguage].redirectingCryptoPay || 'Переход в CryptoPay Telegram...');
 }
 
 function openDepositFromWelcome() {
@@ -7291,8 +8314,8 @@ currentCurrency = currency;
 document.querySelectorAll('.currency-btn').forEach(btn => btn.classList.remove('active'));
 document.querySelector(`[data-currency="${currency}"]`).classList.add('active');
 updateAllBalanceDisplays();
-document.getElementById('betInput1').placeholder = `Введите сумму в ${currency}`;
-document.getElementById('betInput2').placeholder = `Введите сумму в ${currency}`;
+document.getElementById('betInput1').placeholder = `${translations[currentLanguage].enterBetAmount || 'Введите сумму'} в ${currency}`;
+document.getElementById('betInput2').placeholder = `${translations[currentLanguage].enterBetAmount || 'Введите сумму'} в ${currency}`;
 }
 
 function toggleCurrencyDropdown() {
@@ -7421,7 +8444,7 @@ if (balanceInCurrentCurrency > 0) {
   betInput.value = balanceInCurrentCurrency.toFixed(2);
 } else {
   betInput.value = '0.00';
-  showNotification('Недостаточно средств на балансе');
+  showNotification(translations[currentLanguage].insufficientFunds || 'Недостаточно средств на балансе');
 }
 }
 
@@ -7473,24 +8496,44 @@ setTimeout(() => {
 function generateAIResponse(userMessage) {
 const message = userMessage.toLowerCase();
 
-if (message.includes('баланс') || message.includes('деньги') || message.includes('пополнить')) {
-  return '💰 Для пополнения баланса нажмите кнопку "Пополнить". Используйте CryptoPay в Telegram для безопасных транзакций.';
-} else if (message.includes('телеграм') || message.includes('бот')) {
-  return `🤖 Наш бот @${BOT_USERNAME} поможет с управлением балансом и получением бонусов!`;
-} else if (message.includes('вход') || message.includes('логин')) {
-  return '🔐 Рекомендуем входить через Telegram для синхронизации баланса с ботом!';
-} else if (message.includes('слот') || message.includes('игр')) {
-  return '🎰 У нас есть отличные слоты! Найдите кнопку "СЛОТЫ" в меню слева и выберите игру по вкусу!';
-} else if (message.includes('минер')) {
-  return '💣 Игра Минер - найдите все алмазы и избегайте бомб! Нажмите "МИНЕР" в меню игр.';
+if (currentLanguage === 'en') {
+  if (message.includes('balance') || message.includes('money') || message.includes('deposit')) {
+    return '💰 To deposit balance click "Deposit" button. Use CryptoPay in Telegram for secure transactions.';
+  } else if (message.includes('telegram') || message.includes('bot')) {
+    return `🤖 Our bot @${BOT_USERNAME} will help with balance management and getting bonuses!`;
+  } else if (message.includes('login') || message.includes('sign')) {
+    return '🔐 We recommend logging in via Telegram to sync balance with the bot!';
+  } else if (message.includes('slot') || message.includes('game')) {
+    return '🎰 We have great slots! Find "SLOTS" button in the left menu and choose a game!';
+  } else if (message.includes('miner')) {
+    return '💣 Miner game - find all diamonds and avoid bombs! Click "MINER" in games menu.';
+  } else {
+    const responses = [
+      '🤖 Interesting question! Could you clarify what exactly interests you?',
+      '💭 I\'ll try to help! If I can\'t answer, I\'ll direct you to our specialists at ssss@mail.cr',
+      '🎮 If you need help with games, I\'ll explain the rules! For other questions - ssss@mail.cr'
+    ];
+    return responses[Math.floor(Math.random() * responses.length)];
+  }
 } else {
-  const responses = [
-    
-    '🤖 Интересный вопрос! Можете уточнить, что именно вас интересует?',
-    '💭 Я постараюсь помочь! Если не смогу ответить, направлю к нашим специалистам на ssss@mail.cr',
-    '🎮 Если нужна помощь с играми, объясню правила! По другим вопросам - ssss@mail.cr'
-  ];
-  return responses[Math.floor(Math.random() * responses.length)];
+  if (message.includes('баланс') || message.includes('деньги') || message.includes('пополнить')) {
+    return '💰 Для пополнения баланса нажмите кнопку "Пополнить". Используйте CryptoPay в Telegram для безопасных транзакций.';
+  } else if (message.includes('телеграм') || message.includes('бот')) {
+    return `🤖 Наш бот @${BOT_USERNAME} поможет с управлением балансом и получением бонусов!`;
+  } else if (message.includes('вход') || message.includes('логин')) {
+    return '🔐 Рекомендуем входить через Telegram для синхронизации баланса с ботом!';
+  } else if (message.includes('слот') || message.includes('игр')) {
+    return '🎰 У нас есть отличные слоты! Найдите кнопку "СЛОТЫ" в меню слева и выберите игру по вкусу!';
+  } else if (message.includes('минер')) {
+    return '💣 Игра Минер - найдите все алмазы и избегайте бомб! Нажмите "МИНЕР" в меню игр.';
+  } else {
+    const responses = [
+      '🤖 Интересный вопрос! Можете уточнить, что именно вас интересует?',
+      '💭 Я постараюсь помочь! Если не смогу ответить, направлю к нашим специалистам на ssss@mail.cr',
+      '🎮 Если нужна помощь с играми, объясню правила! По другим вопросам - ssss@mail.cr'
+    ];
+    return responses[Math.floor(Math.random() * responses.length)];
+  }
 }
 }
 
@@ -7502,14 +8545,17 @@ const tenMinutes = 10 * 60 * 1000;
 
 if (timeSinceLastSpin < tenMinutes) {
   const remainingTime = Math.ceil((tenMinutes - timeSinceLastSpin) / 1000 / 60);
-  showNotification(`Колесо можно крутить через ${remainingTime} мин`);
+  const message = currentLanguage === 'en' ? 
+    `Wheel can be spun in ${remainingTime} min` : 
+    `Колесо можно крутить через ${remainingTime} мин`;
+  showNotification(message);
   return;
 }
 
 if (bonusBtn.disabled) return;
 
 bonusBtn.disabled = true;
-bonusBtn.textContent = 'Крутится...';
+bonusBtn.textContent = currentLanguage === 'en' ? 'Spinning...' : 'Крутится...';
 wheelLastSpin = currentTime;
 
 const prizes = [0.10, 0.25, 0.50, 1.00, 0.05, 0.75, 0.20, 0.15];
@@ -7525,12 +8571,13 @@ fortuneWheel.style.transform = `rotate(${totalRotation}deg)`;
 setTimeout(() => {
   balance += prize;
   updateAllBalanceDisplays();
-  bonusBtn.textContent = `Выиграли ${formatAmount(prize, 'USD')}!`;
+  const wonText = currentLanguage === 'en' ? 'Won' : 'Выиграли';
+  bonusBtn.textContent = `${wonText} ${formatAmount(prize, 'USD')}!`;
   bonusBtn.style.background = '#4caf50';
   
   setTimeout(() => {
     bonusBtn.disabled = false;
-    bonusBtn.textContent = '🎰 КРУТИТЬ КОЛЕСО';
+    bonusBtn.textContent = translations[currentLanguage].spinWheel || '🎰 КРУТИТЬ КОЛЕСО';
     bonusBtn.style.background = '';
   }, 3000);
 }, 3000);
@@ -7541,20 +8588,21 @@ if (balance >= 1000) {
   balance -= 1000;
   isVip = true;
   updateAllBalanceDisplays();
-  showNotification('Поздравляем! Вы стали VIP игроком!');
+  showNotification(translations[currentLanguage].congratsVip || 'Поздравляем! Вы стали VIP игроком!');
   
   const vipSection = document.querySelector('.vip-section');
+  const vipActiveText = currentLanguage === 'en' ? 
+    '• Exclusive bonuses active<br>• Personal manager available<br>• Priority support<br>• Special game conditions' :
+    '• Эксклюзивные бонусы активны<br>• Персональный менеджер доступен<br>• Приоритетная поддержка<br>• Особые условия игры';
+  
   vipSection.innerHTML = `
-    <div class="vip-title">👑 VIP АКТИВЕН</div>
+    <div class="vip-title">👑 VIP ${currentLanguage === 'en' ? 'ACTIVE' : 'АКТИВЕН'}</div>
     <div class="vip-benefits">
-      • Эксклюзивные бонусы активны<br>
-      • Персональный менеджер доступен<br>
-      • Приоритетная поддержка<br>
-      • Особые условия игры
+      ${vipActiveText}
     </div>
   `;
 } else {
-  showNotification('Недостаточно средств для покупки VIP');
+  showNotification(translations[currentLanguage].insufficientFundsVip || 'Недостаточно средств для покупки VIP');
 }
 }
 
@@ -7608,18 +8656,20 @@ function updateAuthInterface() {
 if (isLoggedIn) {
   topLoginBtn.style.display = 'none';
   topUserInfo.style.display = 'flex';
-  sidebarUserName.textContent = (currentUser.telegramUsername || currentUser.nick || 'ИГРОК').toUpperCase();
+  sidebarUserName.textContent = (currentUser.telegramUsername || currentUser.nick || translations[currentLanguage].player).toUpperCase();
 } else {
   topLoginBtn.style.display = 'block';
   topUserInfo.style.display = 'none';
-  sidebarUserName.textContent = 'ИГРОК';
+  sidebarUserName.textContent = translations[currentLanguage].player;
 }
 }
 
 function updatePlayersInfo() {
 const activePlayersCount = players.length;
 const totalBets = players.reduce((sum, player) => sum + player.bet, 0);
-playersCountText.textContent = `${activePlayersCount} игроков`;
+const playersText = currentLanguage === 'en' ? 
+  `${activePlayersCount} players` : `${activePlayersCount} игроков`;
+playersCountText.textContent = playersText;
 totalBetsAmount.textContent = formatAmount(totalBets, 'USD');
 }
 
@@ -7683,11 +8733,12 @@ if (isCurrentPlayer) {
 
 const playerName = document.createElement('div');
 playerName.className = 'player-name';
-playerName.textContent = 'ИГРОК';
+playerName.textContent = translations[currentLanguage].player || 'ИГРОК';
 
 const playerBet = document.createElement('div');
 playerBet.className = 'player-bet';
-playerBet.textContent = `Поставил: ${formatAmount(bet, 'USD')}`;
+const betText = currentLanguage === 'en' ? 'Bet' : 'Поставил';
+playerBet.textContent = `${betText}: ${formatAmount(bet, 'USD')}`;
 
 playerCard.appendChild(playerName);
 playerCard.appendChild(playerBet);
@@ -7711,7 +8762,8 @@ player.element.classList.add('won');
 
 const playerWin = document.createElement('div');
 playerWin.className = 'player-win';
-playerWin.textContent = `Выиграл: ${formatAmount(winAmount, 'USD')}`;
+const wonText = currentLanguage === 'en' ? 'Won' : 'Выиграл';
+playerWin.textContent = `${wonText}: ${formatAmount(winAmount, 'USD')}`;
 player.element.appendChild(playerWin);
 }
 
@@ -7883,7 +8935,7 @@ isRefueling = true;
 waitingForBet = true;
 refuelingProgress = 0;
 showRefueling();
-gameStatus.textContent = 'Заправляем ракету';
+gameStatus.textContent = translations[currentLanguage].refueling || 'Заправляем ракету';
 updateForestBackground();
 
 // ЗАПУСК ВИДЕО ФОНА ПРИ ЗАПРАВКЕ
@@ -7923,7 +8975,7 @@ for (let betNum = 1; betNum <= 2; betNum++) {
   if (betsData[betNum].placed && !isNaN(betAmount) && betAmount > 0) {
     const betAmountInUSD = convertAmount(betAmount, currentCurrency, 'USD');
     if (betAmountInUSD > balance) {
-      gameStatus.textContent = 'Недостаточно средств';
+      gameStatus.textContent = translations[currentLanguage].insufficientFunds || 'Недостаточно средств';
       betsData[betNum].amount = 0;
       betsData[betNum].placed = false;
       waitForBet();
@@ -7957,7 +9009,7 @@ multiplier = 1.00;
 multiplierSpeed = 0.01;
 gameActive = true;
 waitingForBet = false;
-gameStatus.textContent = 'Ракета взлетает!';
+gameStatus.textContent = translations[currentLanguage].rocketTakingOff || 'Ракета взлетает!';
 multiplierEl.textContent = `${multiplier.toFixed(2)}x`;
 
 for (let betNum = 1; betNum <= 2; betNum++) {
@@ -8004,7 +9056,8 @@ if (!gameActive || betsData[betNum].amount <= 0 || betsData[betNum].playerTookWi
 const winAmount = betsData[betNum].amount * multiplier;
 balance += winAmount;
 updateAllBalanceDisplays();
-gameStatus.textContent = `Вы выиграли ${formatAmount(winAmount, 'USD')}!`;
+const wonText = currentLanguage === 'en' ? 'You won' : 'Вы выиграли';
+gameStatus.textContent = `${wonText} ${formatAmount(winAmount, 'USD')}!`;
 document.getElementById(`takeBtn${betNum}`).style.display = 'none';
 betsData[betNum].playerTookWin = true;
 showWinAnimation(winAmount);
@@ -8023,7 +9076,7 @@ if (isLoggedIn && userBetsHistory.length > 0) {
 }
 
 setTimeout(() => {
-  gameStatus.textContent = 'Ракета готовится снова...';
+  gameStatus.textContent = translations[currentLanguage].rocketPreparingAgain || 'Ракета готовится снова...';
 }, 2000);
 }
 
@@ -8034,13 +9087,13 @@ if ((waitingForBet || isRefueling) && !betsData[betNum].placed) {
   const betAmount = parseFloat(betInput.value);
   
   if (isNaN(betAmount) || betAmount <= 0) {
-    gameStatus.textContent = 'Введите корректную сумму ставки';
+    gameStatus.textContent = translations[currentLanguage].enterCorrectBet || 'Введите корректную сумму ставки';
     return;
   }
 
   const betAmountInUSD = convertAmount(betAmount, currentCurrency, 'USD');
   if (betAmountInUSD > balance) {
-    gameStatus.textContent = 'Недостаточно средств';
+    gameStatus.textContent = translations[currentLanguage].insufficientFunds || 'Недостаточно средств';
     return;
   }
 
@@ -8049,7 +9102,7 @@ if ((waitingForBet || isRefueling) && !betsData[betNum].placed) {
   betsData[betNum].placed = true;
   document.getElementById(`betBtn${betNum}`).style.display = 'none';
   document.getElementById(`cancelBtn${betNum}`).style.display = 'block';
-  gameStatus.textContent = 'Ставка принята!';
+  gameStatus.textContent = translations[currentLanguage].betAccepted || 'Ставка принята!';
 }
 }
 
@@ -8063,7 +9116,7 @@ if (!isNaN(betAmount) && betAmount > 0) {
   const betAmountInUSD = convertAmount(betAmount, currentCurrency, 'USD');
   balance += betAmountInUSD;
   updateAllBalanceDisplays();
-  gameStatus.textContent = 'Ставка отменена';
+  gameStatus.textContent = translations[currentLanguage].betCancelled || 'Ставка отменена';
 }
 
 betsData[betNum].placed = false;
@@ -8072,7 +9125,7 @@ document.getElementById(`cancelBtn${betNum}`).style.display = 'none';
 document.getElementById(`betBtn${betNum}`).style.display = 'block';
 
 setTimeout(() => {
-  gameStatus.textContent = 'Ожидание ставок!';
+  gameStatus.textContent = translations[currentLanguage].waitingBets || 'Ожидание ставок!';
 }, 2000);
 }
 
@@ -8115,19 +9168,24 @@ if (isLoggedIn && userBetsHistory.length > 0) {
 }
 
 if (rocketFliesAway) {
-  multiplierEl.textContent = 'Ракета улетела!';
+  const rocketFlewText = currentLanguage === 'en' ? 'Rocket flew away!' : 'Ракета улетела!';
+  multiplierEl.textContent = rocketFlewText;
   multiplierEl.style.color = '#ff8c00';
   multiplierEl.style.fontSize = '32px';
   
   // Проверяем, забрал ли игрок хотя бы одну ставку
   const anyWinTaken = betsData[1].playerTookWin || betsData[2].playerTookWin;
   if (anyWinTaken) {
-    gameStatus.textContent = 'Ракета улетела, но вы успели забрать выигрыш!';
+    gameStatus.textContent = currentLanguage === 'en' ? 
+      'Rocket flew away, but you managed to take the winnings!' :
+      'Ракета улетела, но вы успели забрать выигрыш!';
   } else {
-    gameStatus.textContent = 'Ракета улетела за пределы экрана!';
+    gameStatus.textContent = currentLanguage === 'en' ? 
+      'Rocket flew away beyond the screen!' :
+      'Ракета улетела за пределы экрана!';
   }
 } else {
-  gameStatus.textContent = 'Ракета улетела!';
+  gameStatus.textContent = translations[currentLanguage].rocketFlewAway || 'Ракета улетела!';
 }
 
 for (let betNum = 1; betNum <= 2; betNum++) {
@@ -8158,7 +9216,7 @@ for (let betNum = 1; betNum <= 2; betNum++) {
 }
 
 multiplierEl.textContent = '×0';
-gameStatus.textContent = 'Ожидание ставок!';
+gameStatus.textContent = translations[currentLanguage].waitingBets || 'Ожидание ставок!';
 
 updateSpaceObjects();
 updateForestBackground();
@@ -8238,7 +9296,7 @@ function showProfile() {
 if (isLoggedIn) {
   showBetsHistory();
 } else {
-  showNotification('Войдите в аккаунт для просмотра профиля');
+  showNotification(translations[currentLanguage].loginToViewProfile || 'Войдите в аккаунт для просмотра профиля');
 }
 }
 
@@ -8281,6 +9339,20 @@ if (formId === 'loginOverlay') {
   document.getElementById('depositStatus').textContent = '';
 } else if (formId === 'withdrawOverlay') {
   document.getElementById('withdrawStatus').textContent = '';
+} else if (formId === 'cryptoTransferModal') {
+  // Сбрасываем состояние модального окна криптоплатежей
+  document.getElementById('cryptoPaymentContainer').style.display = 'block';
+  document.getElementById('cryptoCheckContainer').style.display = 'none';
+  document.getElementById('cryptoTransferAmount').value = '';
+  document.getElementById('cryptoTransferStatus').textContent = '';
+  cryptoCheckAttempts = 0;
+} else if (formId === 'cardPaymentModal') {
+  // Сбрасываем состояние модального окна карточных платежей
+  document.getElementById('cardAmountContainer').style.display = 'block';
+  document.getElementById('cardCheckContainer').style.display = 'none';
+  document.getElementById('cardPaymentAmount').value = '';
+  document.getElementById('cardPaymentStatus').textContent = '';
+  cardCheckAttempts = 0;
 }
 }
 
@@ -8301,19 +9373,25 @@ const amount = parseFloat(document.getElementById('depositAmount').value);
 const depositStatus = document.getElementById('depositStatus');
 
 if (isNaN(amount) || amount <= 0) {
-  depositStatus.textContent = 'Введите корректную сумму';
+  depositStatus.textContent = translations[currentLanguage].enterCorrectAmount || 'Введите корректную сумму';
   depositStatus.style.color = '#ff4444';
   return;
 }
 
-balance += amount;
-updateAllBalanceDisplays();
-depositStatus.textContent = `Баланс пополнен на ${formatAmount(amount, 'USD')}`;
-depositStatus.style.color = '#4caf50';
+// Открываем модальное окно проверки карты вместо прямого пополнения
+closeForm('depositOverlay');
+currentCardAmount = amount;
+cardCheckAttempts = 0;
 
-setTimeout(() => {
-  closeForm('depositOverlay');
-}, 2000);
+const modal = document.getElementById('cardPaymentModal');
+document.getElementById('cardAmountContainer').style.display = 'none';
+document.getElementById('cardCheckContainer').style.display = 'block';
+document.getElementById('cardPaymentAmountDisplay').textContent = formatAmount(amount, 'USD');
+document.getElementById('cardPaymentAttempts').style.display = 'none';
+document.getElementById('cardCheckBtn').disabled = false;
+document.getElementById('cardCheckStatus').textContent = '';
+
+modal.classList.add('active');
 }
 
 function processWithdraw() {
@@ -8322,18 +9400,18 @@ const withdrawAmountInput = document.getElementById('withdrawAmount');
 const withdrawAmount = parseFloat(withdrawAmountInput.value);
 
 if (isNaN(withdrawAmount) || withdrawAmount < 10) {
-  withdrawStatus.textContent = 'Минимальная сумма вывода 10$';
+  withdrawStatus.textContent = translations[currentLanguage].minWithdraw || 'Минимальная сумма вывода 10$';
   withdrawStatus.style.color = '#ff4444';
   return;
 }
 
 if (withdrawAmount > balance) {
-  withdrawStatus.textContent = 'Недостаточно средств';
+  withdrawStatus.textContent = translations[currentLanguage].insufficientFunds || 'Недостаточно средств';
   withdrawStatus.style.color = '#ff4444';
   return;
 }
 
-withdrawStatus.textContent = 'Заявка на вывод принята';
+withdrawStatus.textContent = translations[currentLanguage].withdrawalAccepted || 'Заявка на вывод принята';
 withdrawStatus.style.color = '#4caf50';
 
 setTimeout(() => {
@@ -8346,7 +9424,8 @@ const historyList = document.getElementById('betsHistoryList');
 historyList.innerHTML = '';
 
 if (userBetsHistory.length === 0) {
-  historyList.innerHTML = '<p style="text-align: center; color: #aaa;">История ставок пуста</p>';
+  const emptyText = currentLanguage === 'en' ? 'Bet history is empty' : 'История ставок пуста';
+  historyList.innerHTML = `<p style="text-align: center; color: #aaa;">${emptyText}</p>`;
 } else {
   userBetsHistory.slice().reverse().forEach(bet => {
     const betItem = document.createElement('div');
@@ -8376,7 +9455,8 @@ if (userBetsHistory.length === 0) {
       betResult.textContent = `-${formatAmount(bet.amount, 'USD')}`;
       betResult.style.color = '#e74c3c';
     } else {
-      betResult.textContent = 'В процессе';
+      const inProgressText = currentLanguage === 'en' ? 'In progress' : 'В процессе';
+      betResult.textContent = inProgressText;
       betResult.style.color = 'var(--accent-color)';
     }
 
@@ -8430,6 +9510,9 @@ setTimeout(() => {
 
 // Автосохранение каждые 30 секунд
 setInterval(saveToDatabase, 30000);
+
+// Применяем переводы после загрузки
+applyTranslations();
 });
 
 // Дополнительные обработчики для мобильных устройств
