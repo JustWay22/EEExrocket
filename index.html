@@ -1533,12 +1533,13 @@ max-width: 1400px;
 padding: 0 20px;
 }
 
+/* РАСШИРЕННОЕ ОКНО С ИГРОКАМИ - УВЕЛИЧЕНА ВЫСОТА */
 .players-window {
 background: var(--bg-panel);
 border-radius: 25px;
 padding: 20px;
 width: 250px;
-height: 600px;
+height: calc(600px + 200px); /* Увеличена высота на 200px */
 box-shadow: 0 15px 40px rgba(0, 0, 0, 0.6);
 border: 2px solid var(--border-color);
 position: relative;
@@ -2113,6 +2114,34 @@ background: linear-gradient(135deg, var(--accent-orange), var(--accent-color), v
 background-size: 200% auto;
 color: #000;
 animation: shine 2s linear infinite;
+}
+
+/* СТИЛИ ДЛЯ ЗАБЛОКИРОВАННЫХ КНОПОК */
+.bet-btn.disabled {
+background: #666;
+color: #999;
+cursor: not-allowed;
+opacity: 0.6;
+animation: none;
+transform: none !important;
+box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+}
+
+.bet-btn.disabled:hover {
+transform: none !important;
+box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+}
+
+/* СТИЛИ ДЛЯ КНОПКИ ВХОДА ВМЕСТО СТАВКИ */
+.bet-btn.login-required {
+background: linear-gradient(135deg, #4caf50, #66bb6a);
+color: white;
+animation: none;
+}
+
+.bet-btn.login-required:hover {
+background: linear-gradient(135deg, #66bb6a, #81c784);
+transform: translateY(-2px);
 }
 
 .take-btn {
@@ -6942,7 +6971,7 @@ to {
 
 <!-- Основной контейнер -->
 <div class="main-container">
-<!-- Панель игроков -->
+<!-- Панель игроков - РАСШИРЕНА ВНИЗ -->
 <div class="players-window">
   <div class="players-info">
     <div class="players-count">
@@ -7548,7 +7577,11 @@ ru: {
   // Уведомления
   appSoon: 'Приложение скоро будет доступно',
   moreLinksSoon: 'Больше ссылок скоро',
-  bonusSystemSoon: 'Система бонусов скоро будет доступна!'
+  bonusSystemSoon: 'Система бонусов скоро будет доступна!',
+  
+  // Новые переводы для системы авторизации
+  loginRequired: 'Войдите в аккаунт для ставок',
+  loginToPlay: 'ВОЙТИ'
 },
 en: {
   // General translations
@@ -7684,7 +7717,11 @@ en: {
   // Notifications
   appSoon: 'Application will be available soon',
   moreLinksSoon: 'More links soon',
-  bonusSystemSoon: 'Bonus system will be available soon!'
+  bonusSystemSoon: 'Bonus system will be available soon!',
+  
+  // New translations for auth system
+  loginRequired: 'Login to place bets',
+  loginToPlay: 'LOGIN'
 }
 };
 
@@ -7936,6 +7973,26 @@ const leftSidebar = document.getElementById('leftSidebar');
 const mobileMenuToggle = document.getElementById('mobileMenuToggle');
 const unifiedWindow = document.getElementById('unifiedWindow');
 const userLoginImage = document.getElementById('userLoginImage');
+
+// НОВАЯ ФУНКЦИЯ ДЛЯ ОБНОВЛЕНИЯ СОСТОЯНИЯ КНОПОК СТАВОК
+function updateBetButtonsState() {
+  for (let betNum = 1; betNum <= 2; betNum++) {
+    const betBtn = document.getElementById(`betBtn${betNum}`);
+    
+    if (!isLoggedIn) {
+      // Если не авторизован - показываем кнопку входа
+      betBtn.textContent = translations[currentLanguage].loginToPlay || 'ВОЙТИ';
+      betBtn.classList.add('login-required');
+      betBtn.classList.remove('disabled');
+      betBtn.onclick = () => openForm('loginOverlay');
+    } else {
+      // Если авторизован - показываем обычную кнопку ставки
+      betBtn.textContent = translations[currentLanguage].placeBet || 'ПОСТАВИТЬ';
+      betBtn.classList.remove('login-required', 'disabled');
+      betBtn.onclick = () => placeBet(betNum);
+    }
+  }
+}
 
 // НОВЫЕ ФУНКЦИИ ДЛЯ ТРЕЙДИНГА
 
@@ -8247,6 +8304,8 @@ const data = {
   userBetsHistory: userBetsHistory,
   isVip: isVip,
   currentLanguage: currentLanguage,
+  isLoggedIn: isLoggedIn,
+  currentUser: currentUser,
   lastSave: Date.now()
 };
 localStorage.setItem('xrocket_db', JSON.stringify(data));
@@ -8261,6 +8320,8 @@ try {
     if (data.balance) balance = data.balance;
     if (data.userBetsHistory) userBetsHistory = data.userBetsHistory;
     if (data.isVip) isVip = data.isVip;
+    if (data.isLoggedIn) isLoggedIn = data.isLoggedIn;
+    if (data.currentUser) currentUser = data.currentUser;
     if (data.currentLanguage) {
       currentLanguage = data.currentLanguage;
       changeLanguage(currentLanguage);
@@ -8795,6 +8856,7 @@ isLoggedIn = true;
 currentUser = { telegramUsername };
 topUsername.textContent = telegramUsername.toUpperCase();
 updateAuthInterface();
+updateBetButtonsState(); // ОБНОВЛЯЕМ СОСТОЯНИЕ КНОПОК СТАВОК
 closeForm('loginOverlay');
 
 // ПОКАЗЫВАЕМ КАРТИНКУ ПРИ ВХОДЕ
@@ -8815,6 +8877,9 @@ if (telegramUsername.startsWith('@')) {
 
 loginStatus.textContent = translations[currentLanguage].successfulLogin || 'Успешный вход через Telegram!';
 loginStatus.style.color = '#4caf50';
+
+// Сохраняем состояние авторизации
+saveToDatabase();
 }
 
 function openCryptoPay() {
@@ -9025,6 +9090,12 @@ return 32.50 + Math.random() * 87.50; // 32.50x - 120.00x
 
 // ФУНКЦИИ ДЛЯ ДВУХ СТАВОК
 function addToBet(betNum, amount) {
+// Проверяем авторизацию
+if (!isLoggedIn) {
+  showNotification(translations[currentLanguage].loginRequired || 'Войдите в аккаунт для ставок');
+  return;
+}
+
 const betInput = document.getElementById(`betInput${betNum}`);
 const currentAmount = parseFloat(betInput.value) || 0;
 const convertedAmount = convertAmount(amount, 'USD', currentCurrency);
@@ -9033,6 +9104,12 @@ betInput.value = (currentAmount + convertedAmount).toFixed(2);
 
 // ИСПРАВЛЕННАЯ ФУНКЦИЯ ДЛЯ КНОПКИ "ВСЕ"
 function setBetAll(betNum) {
+// Проверяем авторизацию
+if (!isLoggedIn) {
+  showNotification(translations[currentLanguage].loginRequired || 'Войдите в аккаунт для ставок');
+  return;
+}
+
 const betInput = document.getElementById(`betInput${betNum}`);
 const balanceInCurrentCurrency = convertAmount(balance, 'USD', currentCurrency);
 
@@ -9259,6 +9336,9 @@ if (isLoggedIn) {
   topUserInfo.style.display = 'none';
   sidebarUserName.textContent = translations[currentLanguage].player;
 }
+
+// ОБНОВЛЯЕМ СОСТОЯНИЕ КНОПОК СТАВОК
+updateBetButtonsState();
 }
 
 function updatePlayersInfo() {
@@ -9677,8 +9757,15 @@ setTimeout(() => {
 }, 2000);
 }
 
-// ПОСТАВИТЬ СТАВКУ ДЛЯ КОНКРЕТНОГО ОКНА
+// ПОСТАВИТЬ СТАВКУ ДЛЯ КОНКРЕТНОГО ОКНА - ОБНОВЛЕНО С ПРОВЕРКОЙ АВТОРИЗАЦИИ
 function placeBet(betNum) {
+// ПРОВЕРЯЕМ АВТОРИЗАЦИЮ
+if (!isLoggedIn) {
+  showNotification(translations[currentLanguage].loginRequired || 'Войдите в аккаунт для ставок');
+  openForm('loginOverlay');
+  return;
+}
+
 if ((waitingForBet || isRefueling) && !betsData[betNum].placed) {
   const betInput = document.getElementById(`betInput${betNum}`);
   const betAmount = parseFloat(betInput.value);
@@ -9812,6 +9899,9 @@ for (let betNum = 1; betNum <= 2; betNum++) {
   updateTakeButtonAmount(betNum);
 }
 
+// ОБНОВЛЯЕМ СОСТОЯНИЕ КНОПОК СТАВОК
+updateBetButtonsState();
+
 multiplierEl.textContent = '×0';
 gameStatus.textContent = translations[currentLanguage].waitingBets || 'Ожидание ставок!';
 
@@ -9831,6 +9921,12 @@ setTimeout(() => {
 
 // ПЕРЕКЛЮЧЕНИЕ АВТО КЕШАУТА ДЛЯ КОНКРЕТНОГО ОКНА
 function toggleAutoCashout(betNum) {
+// ПРОВЕРЯЕМ АВТОРИЗАЦИЮ
+if (!isLoggedIn) {
+  showNotification(translations[currentLanguage].loginRequired || 'Войдите в аккаунт для ставок');
+  return;
+}
+
 betsData[betNum].autoCashoutEnabled = !betsData[betNum].autoCashoutEnabled;
 const toggleSwitch = document.getElementById(`toggleSwitch${betNum}`);
 const autoCashoutInput = document.getElementById(`autoCashoutInput${betNum}`);
